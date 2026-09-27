@@ -9,8 +9,9 @@
 /storage/*.key
 /storage/pail
 /resources/js/actions
-/resources/js/routes
-/resources/js/wayfinder
+# Wayfinder files are generated locally but MUST be committed: production
+# Docker builds have no PHP runtime to regenerate them. Update them with
+# `php artisan wayfinder:generate --with-form` after route changes.
 /vendor
 .DS_Store
 .env
