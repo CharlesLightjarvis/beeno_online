@@ -67,22 +67,26 @@ class SalaryController extends Controller
             'amount_millimes' => ['required', 'integer', 'min:1', 'max:999999999'],
         ]);
 
-        $salary = $this->salaryMillimes($session);
-        $paidTotal = $this->paymentsTotal($session);
-        $remaining = $salary - $paidTotal;
+        // The whole computation runs inside a transaction with a row lock on
+        // the session, so two concurrent submissions cannot both cap their
+        // amount against the same remaining balance and overshoot the salary.
+        [$paidTotal, $recordedAmount] = DB::transaction(function () use ($session, $validated): array {
+            $session = CourseSession::query()
+                ->whereKey($session->getKey())
+                ->lockForUpdate()
+                ->firstOrFail();
 
-        $validated['amount_millimes'] = min($validated['amount_millimes'], $remaining);
+            $salary = $this->salaryMillimes($session);
+            $remaining = $salary - $this->paymentsTotal($session);
+            $amount = min((int) $validated['amount_millimes'], $remaining);
 
-        if ($validated['amount_millimes'] < 1) {
-            return back()->withErrors([
-                'amount_millimes' => 'Cette session est déjà intégralement payée.',
-            ]);
-        }
+            if ($amount < 1) {
+                return [null, 0];
+            }
 
-        DB::transaction(function () use ($session, $validated, $salary): void {
             $session->payments()->create([
                 'teacher_id' => $session->teacher_id,
-                'amount_millimes' => $validated['amount_millimes'],
+                'amount_millimes' => $amount,
                 'paid_on' => today()->toDateString(),
             ]);
 
@@ -94,11 +98,20 @@ class SalaryController extends Controller
                     : PaymentStatus::PartiallyPaid,
                 'paid_millimes' => $paidTotal,
             ]);
+
+            return [$paidTotal, $amount];
         });
+
+        if ($recordedAmount < 1) {
+            return back()->withErrors([
+                'amount_millimes' => 'Cette session est déjà intégralement payée.',
+            ]);
+        }
 
         Inertia::flash('toast', [
             'type' => 'success',
-            'message' => 'Versement enregistré : '.number_format($validated['amount_millimes'] / 1000, 3, ',', ' ').' DT.',
+            'message' => 'Versement enregistré : '.number_format($recordedAmount / 1000, 3, ',', ' ').' DT'
+                .($paidTotal >= $this->salaryMillimes($session->fresh()) ? ' — session intégralement payée.' : '.'),
         ]);
 
         return back();

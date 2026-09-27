@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\SecurityHeaders;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -18,12 +19,18 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Coolify (Traefik) sits in front of the app in production: trust its
+        // private network so HTTPS/hosts are correctly detected and cookies
+        // stay secure without mixed-content issues.
+        $middleware->trustProxies(at: '*');
+
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
 
         $middleware->web(append: [
             HandleAppearance::class,
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
+            SecurityHeaders::class,
         ]);
 
         $middleware->redirectGuestsTo(fn () => route('login'));

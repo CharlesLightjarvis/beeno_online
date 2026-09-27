@@ -16,10 +16,28 @@ return [
     */
 
     'ssr' => [
-        'enabled' => true,
+        // Client-side rendering only: no Node SSR server is operated for
+        // this application. Re-enable alongside `php artisan inertia:start-ssr`
+        // if server-side rendering is introduced later.
+        'enabled' => env('INERTIA_SSR_ENABLED', false),
         'url' => 'http://127.0.0.1:13714',
         // 'bundle' => base_path('bootstrap/ssr/ssr.mjs'),
 
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | History
+    |--------------------------------------------------------------------------
+    |
+    | Encrypt page data before it is stored in the browser's history state,
+    | so salary and other sensitive props cannot be read from the history
+    | after the user signs out.
+    |
+    */
+
+    'history' => [
+        'encrypt' => (bool) env('INERTIA_ENCRYPT_HISTORY', true),
     ],
 
     /*

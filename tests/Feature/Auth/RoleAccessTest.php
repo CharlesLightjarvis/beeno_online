@@ -6,6 +6,7 @@ use App\Enums\RoleEnum;
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Inertia\Testing\AssertableInertia as Assert;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -17,6 +18,7 @@ class RoleAccessTest extends TestCase
     {
         parent::setUp();
 
+        $this->withoutVite();
         $this->seed(RolesAndPermissionsSeeder::class);
     }
 
@@ -62,7 +64,12 @@ class RoleAccessTest extends TestCase
 
     public function test_public_registration_is_disabled(): void
     {
-        $this->get('/register')->assertNotFound();
+        $this->get('/register')
+            ->assertNotFound()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('error-page')
+                ->where('status', 404));
+
         $this->post('/register', [])->assertNotFound();
     }
 
