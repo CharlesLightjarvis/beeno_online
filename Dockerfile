@@ -16,7 +16,9 @@ COPY . .
 RUN npm run build
 
 # ---------- Stage 2: PHP runtime with Nginx Unit ----------
-FROM unit:1.34.1-php8.3
+# PHP 8.4: the composer.lock requires >=8.4.1 (Symfony 8 components),
+# matching the local Herd PHP 8.4 used to generate the lock file.
+FROM unit:1.34.1-php8.4
 
 RUN apt update && apt install -y \
     curl unzip git libicu-dev libzip-dev libpng-dev libjpeg-dev libfreetype6-dev libssl-dev \
