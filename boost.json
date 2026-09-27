@@ -1,0 +1,21 @@
+{
+    "agents": [
+        "claude_code"
+    ],
+    "cloud": false,
+    "guidelines": true,
+    "packages": [
+        "spatie/laravel-permission",
+        "spatie/laravel-sluggable"
+    ],
+    "skills": [
+        "infer-conventions",
+        "fortify-development",
+        "laravel-best-practices",
+        "wayfinder-development",
+        "inertia-react-development",
+        "tailwindcss-development",
+        "laravel-permission-development",
+        "sluggable-development"
+    ]
+}

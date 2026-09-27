@@ -1,0 +1,69 @@
+C’est une modification limitée aux actions frontend, donc pas besoin de toucher au backend.
+
+Design proposé :
+
+Remplacer les deux window.confirm() par un composant partagé ConfirmActionDialog.
+Utiliser le AlertDialog Shadcn déjà installé.
+Ouvrir la modale depuis le menu Actions sans fermer ou démonter incorrectement le dialogue.
+Afficher le nom de la session ou de l’étudiant.
+Bouton destructif avec état de chargement pendant la requête.
+Fermer la boîte uniquement après le déclenchement de l’action.
+
+Ensuite, la suite logique du plan est :
+
+Créer la session suivante
+Depuis une session terminée.
+Proposer automatiquement le sous-niveau suivant.
+Reprendre les anciens étudiants précochés.
+Permettre d’en retirer et d’en ajouter.
+Remettre heures et rémunération à zéro.
+
+Finaliser le tableau de bord professeur
+Sessions actives/terminées.
+Total des heures.
+Rémunération personnelle.
+Dernières séances.
+
+Construire l’espace administrateur en lecture seule
+Toutes les sessions et tous les professeurs.
+Progression globale.
+Présences détaillées.
+Rémunération totale, par professeur et par période.
+Aucun bouton de modification.
+
+Nettoyage final de l’ancienne application
+Retirer les derniers éléments Propulse/membership devenus inutiles.
+Conserver uniquement les composants génériques réutilisés.
+
+Réponds oui et j’implémente les deux AlertDialog Shadcn.
+
+
+
+
+
+
+====== ADMIN ====
+Je recommande cette structure :
+
+Dashboard admin
+Sessions actives et terminées
+Total d’heures enseignées
+Rémunération totale
+Nombre de professeurs et d’étudiants
+Aperçu des sessions récentes
+
+Sessions
+Tableau global de toutes les sessions
+Professeur, niveau, étudiants, progression, heures, rémunération et statut
+Filtres par professeur, niveau et statut
+Accès au détail des séances et des présences
+Aucun bouton de modification
+
+Professeurs
+Liste des professeurs
+Heures et rémunération cumulées
+Accès à leurs sessions
+Filtre de rémunération par période basé sur la date réelle des séances
+
+Je préfère cette organisation à un unique gros dashboard : elle restera lisible même avec beaucoup de groupes et de professeurs. La sidebar continuera d’utiliser les permissions, pas directement les rôles.
+
