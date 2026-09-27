@@ -29,6 +29,7 @@ enum RoleEnum: string
                 PermissionEnum::ViewAdminDashboard,
                 PermissionEnum::ViewAdminSessions,
                 PermissionEnum::ViewAdminTeachers,
+                PermissionEnum::ViewAdminSalaries,
                 PermissionEnum::ViewTrainingDashboard,
             ],
 
@@ -36,6 +37,7 @@ enum RoleEnum: string
                 PermissionEnum::ViewTeacherDashboard,
                 PermissionEnum::ManageOwnStudents,
                 PermissionEnum::ManageOwnSessions,
+                PermissionEnum::ViewOwnSalaries,
             ],
 
             self::Student => [],

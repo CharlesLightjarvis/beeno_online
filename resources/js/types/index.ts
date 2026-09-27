@@ -6,3 +6,5 @@ export type * from './student';
 export type * from './course-session';
 export type * from './lesson';
 export type * from './admin-reporting';
+export type * from './payment-status';
+export type * from './salary';

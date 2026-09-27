@@ -1,8 +1,15 @@
 import { Link } from '@inertiajs/react';
 import type { ColumnDef } from '@tanstack/react-table';
-import { CalendarRange } from 'lucide-react';
+import { CalendarRange, MoreHorizontal } from 'lucide-react';
 import { DataTableColumnHeader } from '@/components/data-table-column-header';
 import { Button } from '@/components/ui/button';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuGroup,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import type { AdminTeacher } from '@/types';
 
 export const createColumns = (): ColumnDef<AdminTeacher>[] => [
@@ -51,12 +58,24 @@ export const createColumns = (): ColumnDef<AdminTeacher>[] => [
     {
         id: 'actions',
         cell: ({ row }) => (
-            <Button variant="ghost" size="sm" asChild>
-                <Link href={row.original.sessions_url}>
-                    <CalendarRange data-icon="inline-start" />
-                    Sessions
-                </Link>
-            </Button>
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="size-8 p-0">
+                        <span className="sr-only">Actions</span>
+                        <MoreHorizontal />
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                    <DropdownMenuGroup>
+                        <DropdownMenuItem asChild>
+                            <Link href={row.original.sessions_url}>
+                                <CalendarRange />
+                                Voir les sessions
+                            </Link>
+                        </DropdownMenuItem>
+                    </DropdownMenuGroup>
+                </DropdownMenuContent>
+            </DropdownMenu>
         ),
     },
 ];

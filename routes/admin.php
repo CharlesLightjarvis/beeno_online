@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\CourseSessionController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\SalaryController;
 use App\Http\Controllers\Admin\TeacherController;
 use Illuminate\Support\Facades\Route;
 
@@ -18,4 +19,7 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
     Route::get('sessions/{session}', [CourseSessionController::class, 'show'])
         ->middleware('permission:view.admin-sessions')
         ->name('sessions.show');
+    Route::get('salaries', [SalaryController::class, 'index'])
+        ->middleware('permission:view.admin-salaries')
+        ->name('salaries.index');
 });

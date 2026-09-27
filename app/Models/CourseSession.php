@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\CourseSessionStatus;
+use App\Enums\PaymentStatus;
 use Database\Factories\CourseSessionFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -13,7 +14,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
-/** @property CourseSessionStatus $status */
+/**
+ * @property CourseSessionStatus $status
+ * @property PaymentStatus $payment_status
+ * @property int $paid_millimes
+ */
 #[Fillable([
     'teacher_id',
     'course_level_id',
@@ -21,9 +26,11 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
     'label',
     'target_minutes',
     'hourly_rate_millimes',
+    'paid_millimes',
     'starts_on',
     'completed_at',
     'status',
+    'payment_status',
 ])]
 class CourseSession extends Model
 {
@@ -68,14 +75,24 @@ class CourseSession extends Model
         return $this->hasMany(Lesson::class);
     }
 
+    /** @return HasMany<CourseSessionPayment, $this> */
+    public function payments(): HasMany
+    {
+        return $this->hasMany(CourseSessionPayment::class)
+            ->orderBy('paid_on')
+            ->orderBy('created_at');
+    }
+
     protected function casts(): array
     {
         return [
             'target_minutes' => 'integer',
             'hourly_rate_millimes' => 'integer',
+            'paid_millimes' => 'integer',
             'starts_on' => 'date:Y-m-d',
             'completed_at' => 'datetime',
             'status' => CourseSessionStatus::class,
+            'payment_status' => PaymentStatus::class,
         ];
     }
 }

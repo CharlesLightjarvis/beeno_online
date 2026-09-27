@@ -2,6 +2,7 @@ import { Link } from '@inertiajs/react';
 import type { ColumnDef } from '@tanstack/react-table';
 import { Eye, MoreHorizontal } from 'lucide-react';
 import { DataTableColumnHeader } from '@/components/data-table-column-header';
+import { ProgressBar } from '@/components/progress-bar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -66,8 +67,17 @@ export const createColumns = (): ColumnDef<AdminCourseSession>[] => [
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Progression" />
         ),
-        cell: ({ row }) =>
-            `${row.original.progress_percent.toLocaleString('fr-FR')} %`,
+        cell: ({ row }) => (
+            <div className="flex items-center gap-2">
+                <ProgressBar
+                    value={row.original.progress_percent}
+                    className="w-20"
+                />
+                <span className="text-xs text-muted-foreground">
+                    {row.original.progress_percent.toLocaleString('fr-FR')}%
+                </span>
+            </div>
+        ),
     },
     {
         accessorKey: 'remuneration_millimes',

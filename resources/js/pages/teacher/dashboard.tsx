@@ -6,6 +6,7 @@ import {
     Coins,
     ListChecks,
 } from 'lucide-react';
+import { ProgressBar } from '@/components/progress-bar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -140,7 +141,22 @@ export default function TeacherDashboard({
                                                 colSpan={4}
                                                 className="h-24 text-center text-muted-foreground"
                                             >
-                                                Aucune session active.
+                                                <div className="flex flex-col items-center gap-3">
+                                                    <span>
+                                                        Aucune session active.
+                                                    </span>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        asChild
+                                                    >
+                                                        <Link
+                                                            href={sessions.create()}
+                                                        >
+                                                            Créer une session
+                                                        </Link>
+                                                    </Button>
+                                                </div>
                                             </TableCell>
                                         </TableRow>
                                     ) : (
@@ -170,10 +186,20 @@ export default function TeacherDashboard({
                                                     h
                                                 </TableCell>
                                                 <TableCell>
-                                                    {session.progress_percent.toLocaleString(
-                                                        'fr-FR',
-                                                    )}{' '}
-                                                    %
+                                                    <div className="flex items-center gap-2">
+                                                        <ProgressBar
+                                                            value={
+                                                                session.progress_percent
+                                                            }
+                                                            className="w-20"
+                                                        />
+                                                        <span className="text-xs text-muted-foreground">
+                                                            {session.progress_percent.toLocaleString(
+                                                                'fr-FR',
+                                                            )}
+                                                            %
+                                                        </span>
+                                                    </div>
                                                 </TableCell>
                                             </TableRow>
                                         ))

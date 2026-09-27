@@ -1,5 +1,11 @@
 import { Link, usePage } from '@inertiajs/react';
-import { CalendarRange, GraduationCap, LayoutGrid, Users } from 'lucide-react';
+import {
+    CalendarRange,
+    GraduationCap,
+    LayoutGrid,
+    Users,
+    Wallet,
+} from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -14,6 +20,7 @@ import {
 } from '@/components/ui/sidebar';
 import adminRoutes from '@/routes/admin';
 import teacher from '@/routes/teacher';
+import teacherSalaries from '@/routes/teacher/salaries';
 import sessions from '@/routes/teacher/sessions';
 import students from '@/routes/teacher/students';
 import type { Auth, NavItem } from '@/types';
@@ -54,6 +61,16 @@ export function AppSidebar() {
             permission: auth.permissions.includes('view.admin-sessions')
                 ? 'view.admin-sessions'
                 : 'manage.own-sessions',
+        },
+        {
+            title: 'Salaires',
+            href: auth.permissions.includes('view.admin-salaries')
+                ? adminRoutes.salaries.index()
+                : teacherSalaries.index(),
+            icon: Wallet,
+            permission: auth.permissions.includes('view.admin-salaries')
+                ? 'view.admin-salaries'
+                : 'view.own-salaries',
         },
     ];
 

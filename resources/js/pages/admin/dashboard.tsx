@@ -7,6 +7,7 @@ import {
     GraduationCap,
     ListChecks,
 } from 'lucide-react';
+import { ProgressBar } from '@/components/progress-bar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -80,12 +81,12 @@ export default function AdminDashboard({ summary, recentSessions }: Props) {
     return (
         <>
             <Head title="Dashboard admin" />
-            <div className="flex flex-col gap-8 p-4">
+            <div className="flex h-full flex-1 flex-col gap-6 p-4">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">
+                    <h1 className="text-2xl font-semibold tracking-tight">
                         Vue d’ensemble
                     </h1>
-                    <p className="text-muted-foreground">
+                    <p className="text-sm text-muted-foreground">
                         Suivez l’activité de tous les professeurs et groupes.
                     </p>
                 </div>
@@ -123,7 +124,7 @@ export default function AdminDashboard({ summary, recentSessions }: Props) {
                                 Les derniers groupes mis à jour.
                             </CardDescription>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center justify-end gap-2">
                             <Button variant="outline" asChild>
                                 <Link href={adminRoutes.teachers.index()}>
                                     <GraduationCap data-icon="inline-start" />
@@ -178,11 +179,21 @@ export default function AdminDashboard({ summary, recentSessions }: Props) {
                                             <TableCell>
                                                 {session.level.code}
                                             </TableCell>
-                                            <TableCell>
-                                                {session.progress_percent.toLocaleString(
-                                                    'fr-FR',
-                                                )}{' '}
-                                                %
+                                            <TableCell className="min-w-32">
+                                                <div className="flex items-center gap-2">
+                                                    <ProgressBar
+                                                        value={
+                                                            session.progress_percent
+                                                        }
+                                                        className="w-24"
+                                                    />
+                                                    <span className="text-xs text-muted-foreground">
+                                                        {session.progress_percent.toLocaleString(
+                                                            'fr-FR',
+                                                        )}
+                                                        %
+                                                    </span>
+                                                </div>
                                             </TableCell>
                                             <TableCell>
                                                 <Badge
