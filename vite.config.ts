@@ -26,9 +26,13 @@ export default defineConfig({
         tailwindcss(),
         wayfinder({
             formVariants: true,
-            command: process.env.PROPULSE_PHP_BINARY
-                ? `"${process.env.PROPULSE_PHP_BINARY}" artisan wayfinder:generate`
-                : 'php artisan wayfinder:generate',
+            // Docker builds have no PHP binary: the committed routes under
+            // resources/js/routes are used as-is when generation is skipped.
+            command: process.env.WAYFINDER_SKIP_GENERATE
+                ? 'echo "wayfinder: generation skipped"'
+                : process.env.PROPULSE_PHP_BINARY
+                    ? `"${process.env.PROPULSE_PHP_BINARY}" artisan wayfinder:generate`
+                    : 'php artisan wayfinder:generate',
         }),
     ],
 });

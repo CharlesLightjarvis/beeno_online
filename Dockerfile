@@ -6,6 +6,8 @@ WORKDIR /app
 # APP_NAME is baked into the client bundle via VITE_APP_NAME.
 ARG APP_NAME=Beeno
 ENV VITE_APP_NAME="${APP_NAME}"
+# No PHP binary here: reuse the wayfinder routes committed in the repo.
+ENV WAYFINDER_SKIP_GENERATE=1
 
 COPY package.json ./
 RUN npm install --no-audit --no-fund
