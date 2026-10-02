@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'ntfy' => [
+        'admin_login_url' => env('NTFY_ADMIN_LOGIN_URL', 'https://ntfy.sh/mypersonalalert'),
+    ],
+
 ];
