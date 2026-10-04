@@ -74,6 +74,13 @@ export const createColumns = (): ColumnDef<Student>[] => [
         ),
     },
     {
+        accessorKey: 'email',
+        header: ({ column }) => (
+            <DataTableColumnHeader column={column} title="Adresse e-mail" />
+        ),
+        cell: ({ row }) => <span>{row.original.email ?? 'Non renseignée'}</span>,
+    },
+    {
         accessorKey: 'created_at',
         header: ({ column }) => (
             <DataTableColumnHeader column={column} title="Ajouté le" />

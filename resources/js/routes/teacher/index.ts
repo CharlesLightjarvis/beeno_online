@@ -1,5 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition } from './../../wayfinder'
 import students from './students'
+import exams from './exams'
+import examSessions from './exam-sessions'
 import sessions from './sessions'
 import salaries from './salaries'
 /**
@@ -83,6 +85,8 @@ dashboard.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 const teacher = {
     dashboard: Object.assign(dashboard, dashboard),
 students: Object.assign(students, students),
+exams: Object.assign(exams, exams),
+examSessions: Object.assign(examSessions, examSessions),
 sessions: Object.assign(sessions, sessions),
 salaries: Object.assign(salaries, salaries),
 }

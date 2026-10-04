@@ -36,6 +36,7 @@ class LoginResponse implements LoginResponseContract
         $fallback = match (true) {
             $user->isAdmin() => route('admin.dashboard'),
             $user->isTeacher() => route('teacher.dashboard'),
+            $user->isStudent() => route('student.dashboard'),
             default => route('login'),
         };
 

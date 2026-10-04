@@ -19,7 +19,7 @@ class StudentController extends Controller
         return Inertia::render('teacher/students/index', [
             'students' => $request->user()->students()
                 ->whereNull('archived_at')
-                ->select(['id', 'name', 'created_at'])
+                ->select(['id', 'name', 'email', 'created_at'])
                 ->orderBy('name')
                 ->paginate(15)
                 ->withQueryString(),
@@ -34,7 +34,7 @@ class StudentController extends Controller
     public function store(StoreStudentRequest $request, CreateStudent $createStudent): RedirectResponse
     {
         $data = $request->validated();
-        $createStudent->handle($request->user(), $data['name']);
+        $createStudent->handle($request->user(), $data['name'], $data['email']);
 
         Inertia::flash('toast', ['type' => 'success', 'message' => 'Étudiant ajouté.']);
 
@@ -46,13 +46,16 @@ class StudentController extends Controller
         $this->authorize('view', $student);
 
         return Inertia::render('teacher/students/edit', [
-            'student' => $student->only(['id', 'name']),
+            'student' => $student->only(['id', 'name', 'email']),
         ]);
     }
 
     public function update(UpdateStudentRequest $request, User $student): RedirectResponse
     {
         $data = $request->validated();
+        if ($student->password === null) {
+            $data['password'] = CreateStudent::defaultPassword($data['name']);
+        }
         $student->update($data);
 
         Inertia::flash('toast', ['type' => 'success', 'message' => 'Étudiant mis à jour.']);

@@ -18,4 +18,10 @@ enum PermissionEnum: string
     case ViewOwnSalaries = 'view.own-salaries';
     case ManageOwnStudents = 'manage.own-students';
     case ManageOwnSessions = 'manage.own-sessions';
+    case ManageOwnExams = 'manage.own-exams';
+    case ManageOwnExamSessions = 'manage.own-exam-sessions';
+    case ViewOwnExamSessions = 'view.own-exam-sessions';
+
+    // Étudiant
+    case ViewStudentDashboard = 'view.student-dashboard';
 }

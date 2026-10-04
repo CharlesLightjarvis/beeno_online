@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
             RolesAndPermissionsSeeder::class,
             CourseLevelSeeder::class,
             UsersSeeder::class,
+            TelcA1LesenSeeder::class,
         ]);
     }
 }

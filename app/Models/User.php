@@ -90,6 +90,24 @@ class User extends Authenticatable implements PasskeyUser
         return $this->hasMany(CourseSession::class, 'teacher_id');
     }
 
+    /** @return HasMany<Exam, $this> */
+    public function exams(): HasMany
+    {
+        return $this->hasMany(Exam::class, 'teacher_id');
+    }
+
+    /** @return HasMany<ExamSession, $this> */
+    public function examSessions(): HasMany
+    {
+        return $this->hasMany(ExamSession::class, 'teacher_id');
+    }
+
+    /** @return HasMany<ExamParticipation, $this> */
+    public function examParticipations(): HasMany
+    {
+        return $this->hasMany(ExamParticipation::class, 'student_id');
+    }
+
     /** @return BelongsToMany<CourseSession, $this> */
     public function enrolledCourseSessions(): BelongsToMany
     {

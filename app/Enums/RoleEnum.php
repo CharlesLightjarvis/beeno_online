@@ -37,10 +37,12 @@ enum RoleEnum: string
                 PermissionEnum::ViewTeacherDashboard,
                 PermissionEnum::ManageOwnStudents,
                 PermissionEnum::ManageOwnSessions,
+                PermissionEnum::ManageOwnExams,
+                PermissionEnum::ManageOwnExamSessions,
                 PermissionEnum::ViewOwnSalaries,
             ],
 
-            self::Student => [],
+            self::Student => [PermissionEnum::ViewStudentDashboard, PermissionEnum::ViewOwnExamSessions],
         };
     }
 

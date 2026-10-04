@@ -71,6 +71,17 @@ class RoleAccessTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_student_dashboard_is_available_without_email_verification(): void
+    {
+        $student = User::factory()->create(['email_verified_at' => null]);
+        $student->assignRole('student');
+
+        $this->actingAs($student)
+            ->get(route('student.dashboard'))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page->component('student/dashboard'));
+    }
+
     public function test_public_registration_is_disabled(): void
     {
         $this->get('/register')
