@@ -136,14 +136,15 @@ export default function ExamSessionOverview({
     return (
         <>
             <Head title={session.title} />
-            {session.participations.map((participation) => (
-                <ExamSessionPresenceListener
-                    key={participation.id}
-                    sessionId={session.id}
-                    participationId={participation.id}
-                    onPresenceChange={updatePresence}
-                />
-            ))}
+            {session.status !== 'closed' &&
+                session.participations.map((participation) => (
+                    <ExamSessionPresenceListener
+                        key={participation.id}
+                        sessionId={session.id}
+                        participationId={participation.id}
+                        onPresenceChange={updatePresence}
+                    />
+                ))}
             <div className="container mx-auto max-w-4xl space-y-7 p-4 sm:p-6">
                 <header className="flex flex-wrap items-start justify-between gap-4">
                     <div>
@@ -165,7 +166,8 @@ export default function ExamSessionOverview({
 
                 <Separator />
 
-                <section className="space-y-3">
+                {session.status !== 'closed' && (
+                    <section className="space-y-3">
                     <div>
                         <h2 className="text-lg font-semibold">Code d’accès</h2>
                         <p className="text-sm text-muted-foreground">
@@ -190,7 +192,8 @@ export default function ExamSessionOverview({
                             {copied ? 'Copié' : 'Copier le code'}
                         </Button>
                     </div>
-                </section>
+                    </section>
+                )}
 
                 <section className="space-y-3">
                     <div>
@@ -212,6 +215,7 @@ export default function ExamSessionOverview({
                             session.participations.map((participation) => {
                                 const seen = lastSeen[participation.student.id];
                                 const online =
+                                    session.status !== 'closed' &&
                                     participation.status !== 'completed' &&
                                     (onlineParticipations.has(participation.id) ||
                                         Boolean(
@@ -219,7 +223,9 @@ export default function ExamSessionOverview({
                                                 now - Date.parse(seen) < 45_000,
                                         ));
                                 const studentStatus =
-                                    participation.status === 'completed'
+                                    session.status === 'closed'
+                                        ? 'Session clôturée'
+                                        : participation.status === 'completed'
                                         ? 'Examen terminé'
                                         : participation.status === 'in_progress'
                                           ? 'A rejoint l’examen'
@@ -234,9 +240,30 @@ export default function ExamSessionOverview({
                                         key={participation.id}
                                         className="flex flex-wrap items-center justify-between gap-3 px-4 py-3"
                                     >
-                                        <span className="font-medium">
-                                            {participation.student.name}
-                                        </span>
+                                        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-4 gap-y-1">
+                                            <span className="font-medium">
+                                                {participation.student.name}
+                                            </span>
+                                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
+                                                {[
+                                                    ['lesen', 'Lesen'],
+                                                    ['hoeren', 'Hören'],
+                                                    ['schreiben', 'Schreiben'],
+                                                    ['sprechen', 'Sprechen'],
+                                                ].map(([module, label]) => {
+                                                    const score = participation.scores?.[module];
+                                                    const value = session.status === 'closed' && score?.available
+                                                        ? `${score.correct}/${score.total}`
+                                                        : '—';
+
+                                                    return (
+                                                        <span key={module} className="whitespace-nowrap">
+                                                            {label} {value}
+                                                        </span>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
                                         <div className="flex flex-wrap items-center gap-2">
                                             <Badge
                                                 variant={

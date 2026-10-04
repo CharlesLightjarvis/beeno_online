@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../../../wayfinder'
 /**
 * @see \App\Http\Controllers\Student\ExamSessionController::store
- * @see app/Http/Controllers/Student/ExamSessionController.php:128
+ * @see app/Http/Controllers/Student/ExamSessionController.php:226
  * @route '/student/exam-sessions/{examParticipation}/responses'
  */
 export const store = (args: { examParticipation: string | { id: string } } | [examParticipation: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -16,7 +16,7 @@ store.definition = {
 
 /**
 * @see \App\Http\Controllers\Student\ExamSessionController::store
- * @see app/Http/Controllers/Student/ExamSessionController.php:128
+ * @see app/Http/Controllers/Student/ExamSessionController.php:226
  * @route '/student/exam-sessions/{examParticipation}/responses'
  */
 store.url = (args: { examParticipation: string | { id: string } } | [examParticipation: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions) => {
@@ -49,7 +49,7 @@ store.url = (args: { examParticipation: string | { id: string } } | [examPartici
 
 /**
 * @see \App\Http\Controllers\Student\ExamSessionController::store
- * @see app/Http/Controllers/Student/ExamSessionController.php:128
+ * @see app/Http/Controllers/Student/ExamSessionController.php:226
  * @route '/student/exam-sessions/{examParticipation}/responses'
  */
 store.post = (args: { examParticipation: string | { id: string } } | [examParticipation: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -59,7 +59,7 @@ store.post = (args: { examParticipation: string | { id: string } } | [examPartic
 
     /**
 * @see \App\Http\Controllers\Student\ExamSessionController::store
- * @see app/Http/Controllers/Student/ExamSessionController.php:128
+ * @see app/Http/Controllers/Student/ExamSessionController.php:226
  * @route '/student/exam-sessions/{examParticipation}/responses'
  */
     const storeForm = (args: { examParticipation: string | { id: string } } | [examParticipation: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -69,7 +69,7 @@ store.post = (args: { examParticipation: string | { id: string } } | [examPartic
 
             /**
 * @see \App\Http\Controllers\Student\ExamSessionController::store
- * @see app/Http/Controllers/Student/ExamSessionController.php:128
+ * @see app/Http/Controllers/Student/ExamSessionController.php:226
  * @route '/student/exam-sessions/{examParticipation}/responses'
  */
         storeForm.post = (args: { examParticipation: string | { id: string } } | [examParticipation: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({

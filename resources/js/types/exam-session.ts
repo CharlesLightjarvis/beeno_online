@@ -21,6 +21,11 @@ export type ExamSessionStudentProgress = {
         answered_task_positions: number[];
         total_tasks: number;
     }[];
+    scores?: Record<string, {
+        available: boolean;
+        correct: number;
+        total: number;
+    }>;
     last_seen_at: string | null;
     completed_at: string | null;
 };
@@ -39,7 +44,7 @@ export type ExamSessionDetail = {
 };
 
 export type ExamSessionLobby = Omit<ExamSessionDetail, 'participations'> & {
-    participations: Omit<ExamSessionStudentProgress, 'progress'>[];
+    participations: ExamSessionStudentProgress[];
 };
 
 export type ExamSessionReadingMaterial = {

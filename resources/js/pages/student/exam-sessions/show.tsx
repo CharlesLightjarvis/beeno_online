@@ -13,15 +13,22 @@ import examSessions from '@/routes/student/exam-sessions';
 import type { StudentExamDelivery, StudentExamParticipation } from '@/types';
 
 type SaveState = 'idle' | 'saving' | 'saved' | 'error';
+type ExamReview = Record<string, { selected_choice_id: string | null; correct_choice_id: string | null; is_correct: boolean | null }>;
+type ReviewScores = Record<string, { available: boolean; correct: number; total: number }>;
+const reviewModuleLabels: Record<string, string> = { lesen: 'Lesen', hoeren: 'Hören', schreiben: 'Schreiben', sprechen: 'Sprechen' };
 
 export default function StudentExamSessionShow({
     participation,
     exam,
     responses,
+    review,
+    review_scores,
 }: {
     participation: StudentExamParticipation;
     exam: StudentExamDelivery;
     responses: Record<string, string>;
+    review?: ExamReview | null;
+    review_scores?: ReviewScores | null;
 }) {
     const [partKey, setPartKey] = useState(exam.parts[0]?.id ?? 'empty');
     const [taskPosition, setTaskPosition] = useState(1);
@@ -61,6 +68,20 @@ export default function StudentExamSessionShow({
             response_type: 'choice',
             choices: [],
         };
+    const reviewTask = review?.[activeTask.id];
+    const reviewChoiceClass = (choiceId: string) => {
+        if (!reviewTask) {
+            return answers[activeTask.id] === choiceId ? 'border-primary bg-accent' : '';
+        }
+        if (reviewTask.correct_choice_id === choiceId) {
+            return 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/20';
+        }
+        if (reviewTask.selected_choice_id === choiceId) {
+            return 'border-red-500 bg-red-50 dark:bg-red-950/20';
+        }
+
+        return '';
+    };
     const isLocked =
         participation.status === 'completed' ||
         participation.session_status !== 'open' ||
@@ -243,7 +264,10 @@ export default function StudentExamSessionShow({
     }, [flushPendingAnswers]);
 
     useEffect(() => {
-        if (participation.status === 'completed') {
+        if (
+            participation.status === 'completed' ||
+            participation.session_status !== 'open'
+        ) {
             return;
         }
 
@@ -354,7 +378,8 @@ export default function StudentExamSessionShow({
     return (
         <>
             <Head title={exam.title} />
-            {participation.status !== 'completed' && (
+            {participation.status !== 'completed' &&
+                participation.session_status === 'open' && (
                 <ExamSessionPresenceJoiner
                     sessionId={participation.session_id}
                     participationId={participation.id}
@@ -423,6 +448,15 @@ export default function StudentExamSessionShow({
                         La session a été clôturée par le professeur. Vos
                         réponses enregistrées restent sauvegardées.
                     </p>
+                )}
+                {review && review_scores && (
+                    <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4" aria-label="Notes par module">
+                        {['lesen', 'hoeren', 'schreiben', 'sprechen'].map((module) => {
+                            const score = review_scores[module];
+
+                            return <div key={module} className="rounded-md border p-3"><p className="text-sm text-muted-foreground">{reviewModuleLabels[module]}</p><p className="mt-1 text-xl font-semibold">{score?.available ? `${score.correct} / ${score.total}` : '—'}</p>{!score?.available && <p className="text-xs text-muted-foreground">Non disponible</p>}</div>;
+                        })}
+                    </section>
                 )}
                 <Separator />
 
@@ -509,6 +543,11 @@ export default function StudentExamSessionShow({
                                 {activePart.module} · Teil {activePart.part_number} · Question{' '}
                                 {activeTask.position}
                             </h3>
+                            {reviewTask && (
+                                <Badge variant={reviewTask.is_correct === true ? 'default' : reviewTask.is_correct === false ? 'destructive' : 'warning'}>
+                                    {activeTask.response_type === 'text' ? (answers[activeTask.id] ? 'À corriger' : 'Sans réponse') : reviewTask.is_correct === true ? 'Correcte' : reviewTask.is_correct === false ? 'Incorrecte' : 'Sans réponse'}
+                                </Badge>
+                            )}
                             <span
                                 aria-live="polite"
                                 className="text-sm text-muted-foreground"
@@ -522,9 +561,11 @@ export default function StudentExamSessionShow({
                                         : ''}
                             </span>
                         </div>
-                        {activePart.module !== 'schreiben' && (
+                        {activePart.module === 'schreiben' && review ? (
+                            <MarkdownContent markdown={activeTask.prompt ?? ''} className="text-base leading-7" />
+                        ) : activePart.module !== 'schreiben' ? (
                             <p className="text-base leading-7">{activeTask.prompt}</p>
-                        )}
+                        ) : null}
 
                         {activeTask.response_type === 'text' ? (
                             <textarea
@@ -541,7 +582,7 @@ export default function StudentExamSessionShow({
                                 <legend className="text-sm font-medium">Choisissez une réponse</legend>
                                 <div className="flex flex-col gap-3">
                                     {activeTask.choices.map((choice) => (
-                                        <label key={choice.id} className={`flex cursor-pointer items-start gap-3 rounded-md border px-4 py-3 text-sm ${answers[activeTask.id] === choice.id ? 'border-primary bg-accent' : ''} ${isLocked ? 'cursor-not-allowed opacity-70' : ''}`}>
+                                        <label key={choice.id} className={`flex cursor-pointer items-start gap-3 rounded-md border px-4 py-3 text-sm ${reviewChoiceClass(choice.id)} ${isLocked ? 'cursor-not-allowed opacity-70' : ''}`}>
                                             <input type="radio" name={`answer-${activeTask.id}`} value={choice.id} checked={answers[activeTask.id] === choice.id} disabled={isLocked} onChange={() => selectChoice(choice.id)} className="mt-1 size-4 accent-primary" />
                                             <span><span className="font-semibold">{choice.label}</span>{choice.body && <span className="ml-2">{choice.body}</span>}</span>
                                         </label>
@@ -557,7 +598,7 @@ export default function StudentExamSessionShow({
                                     {activeTask.choices.map((choice) => (
                                         <label
                                             key={choice.id}
-                                            className={`flex min-h-12 w-full cursor-pointer items-center justify-center rounded-md border px-4 py-3 font-medium sm:flex-1 ${answers[activeTask.id] === choice.id ? 'border-primary bg-accent ring-1 ring-primary' : ''} ${isLocked ? 'cursor-not-allowed opacity-70' : ''}`}
+                                            className={`flex min-h-12 w-full cursor-pointer items-center justify-center rounded-md border px-4 py-3 font-medium sm:flex-1 ${reviewChoiceClass(choice.id)} ${isLocked ? 'cursor-not-allowed opacity-70' : ''}`}
                                         >
                                             <input
                                                 type="radio"
@@ -588,7 +629,7 @@ export default function StudentExamSessionShow({
                                     {activeTask.choices.map((choice) => (
                                         <label
                                             key={choice.id}
-                                            className={`flex min-w-36 cursor-pointer items-center gap-3 rounded-md border px-4 py-3 text-sm ${answers[activeTask.id] === choice.id ? 'border-primary bg-accent' : ''} ${isLocked ? 'cursor-not-allowed opacity-70' : ''}`}
+                                            className={`flex min-w-36 cursor-pointer items-center gap-3 rounded-md border px-4 py-3 text-sm ${reviewChoiceClass(choice.id)} ${isLocked ? 'cursor-not-allowed opacity-70' : ''}`}
                                         >
                                             <input
                                                 type="radio"

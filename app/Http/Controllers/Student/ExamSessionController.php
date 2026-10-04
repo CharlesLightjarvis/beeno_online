@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Student;
 use App\Actions\Student\FinishExamParticipation;
 use App\Actions\Student\JoinExamSession;
 use App\Actions\Student\SaveExamResponse;
+use App\Enums\ExamParticipationStatus;
 use App\Events\ExamSessionPresenceUpdated;
 use App\Events\ExamSessionProgressUpdated;
 use App\Http\Controllers\Controller;
@@ -77,12 +78,41 @@ class ExamSessionController extends Controller
         $hasStarted = $session->started_at !== null;
 
         if ($hasStarted) {
-            $examParticipation->load('examSession.parts.readingMaterials', 'examSession.parts.tasks.choices', 'examSession.parts.tasks.readingMaterial', 'responses');
+            $examParticipation->load('examSession.parts.readingMaterials', 'examSession.parts.tasks.choices', 'examSession.parts.tasks.readingMaterial', 'responses.choice');
         }
 
         $visibleParts = $hasStarted && $session->active_module !== null
             ? $session->parts->filter(fn (ExamSessionPart $part): bool => $part->module_position <= ($session->parts->firstWhere('module', $session->active_module)?->module_position ?? 0))->values()
             : $session->parts;
+
+        $review = ($examParticipation->status === ExamParticipationStatus::Completed || $session->status->value === 'closed')
+            ? $session->parts->flatMap->tasks->mapWithKeys(function (ExamSessionTask $task) use ($examParticipation): array {
+                $response = $examParticipation->responses->firstWhere('task_id', $task->id);
+                $correctChoice = $task->choices->firstWhere('is_correct', true);
+
+                return [(string) $task->id => [
+                    'selected_choice_id' => $response?->choice_id,
+                    'correct_choice_id' => $correctChoice?->id,
+                    'is_correct' => $response?->choice?->is_correct,
+                ]];
+            })->all()
+            : null;
+        $reviewScores = $review === null ? null : collect(['lesen', 'hoeren', 'schreiben', 'sprechen'])
+            ->mapWithKeys(function (string $module) use ($session, $examParticipation): array {
+                $tasks = $session->parts->where('module', $module)->flatMap->tasks;
+                $choiceTasks = $tasks->where('response_type', 'choice');
+                $correct = $choiceTasks->filter(function (ExamSessionTask $task) use ($examParticipation): bool {
+                    $response = $examParticipation->responses->firstWhere('task_id', $task->id);
+
+                    return $response?->choice?->is_correct === true;
+                })->count();
+
+                return [$module => [
+                    'available' => $choiceTasks->isNotEmpty(),
+                    'correct' => $correct,
+                    'total' => $choiceTasks->count(),
+                ]];
+            })->all();
 
         return Inertia::render('student/exam-sessions/show', [
             'participation' => [
@@ -122,6 +152,74 @@ class ExamSessionController extends Controller
             'responses' => $hasStarted ? $examParticipation->responses->mapWithKeys(
                 fn ($response): array => [$response->task_id => $response->choice_id ?? $response->answer_text],
             ) : [],
+            'review' => $review,
+            'review_scores' => $reviewScores,
+        ]);
+    }
+
+    public function results(ExamParticipation $examParticipation): Response|RedirectResponse
+    {
+        $this->authorize('view', $examParticipation);
+
+        abort_unless($examParticipation->status === ExamParticipationStatus::Completed || $examParticipation->examSession->status->value === 'closed', 403);
+
+        return redirect()->route('student.exam-sessions.show', $examParticipation);
+
+        $examParticipation->load('examSession.parts.tasks.choices', 'responses.choice', 'responses.task.part');
+        $responses = $examParticipation->responses->keyBy('task_id');
+        $modules = [];
+        $correct = 0;
+        $scored = 0;
+        $pending = 0;
+
+        foreach ($examParticipation->examSession->parts as $part) {
+            $module = (string) $part->module;
+            $modules[$module] ??= ['module' => $module, 'parts' => [], 'correct' => 0, 'scored' => 0, 'pending' => 0];
+            $partData = ['part_number' => (int) $part->part_number, 'tasks' => []];
+
+            foreach ($part->tasks as $task) {
+                $response = $responses->get($task->id);
+                $selectedChoice = $response?->choice;
+                $isCorrect = $task->response_type === 'choice' && $selectedChoice !== null
+                    ? (bool) $selectedChoice->is_correct
+                    : null;
+
+                if ($isCorrect !== null) {
+                    $scored++;
+                    $modules[$module]['scored']++;
+                    if ($isCorrect) {
+                        $correct++;
+                        $modules[$module]['correct']++;
+                    }
+                } elseif ($task->response_type === 'text' && $response !== null) {
+                    $pending++;
+                    $modules[$module]['pending']++;
+                }
+
+                $partData['tasks'][] = [
+                    'position' => (int) $task->position,
+                    'prompt' => $task->prompt,
+                    'response_type' => (string) $task->response_type,
+                    'answer_text' => $response?->answer_text,
+                    'selected_choice_id' => $response?->choice_id,
+                    'selected_choice_label' => $selectedChoice?->label,
+                    'is_correct' => $isCorrect,
+                    'choices' => $task->choices->map(fn ($choice): array => [
+                        'id' => (string) $choice->id,
+                        'label' => (string) $choice->label,
+                        'body' => $choice->body,
+                        'is_correct' => (bool) $choice->is_correct,
+                    ])->all(),
+                ];
+            }
+
+            $modules[$module]['parts'][] = $partData;
+        }
+
+        return Inertia::render('student/exam-sessions/results', [
+            'exam' => ['title' => $examParticipation->examSession->title],
+            'summary' => ['correct' => $correct, 'scored' => $scored, 'pending' => $pending],
+            'modules' => array_values($modules),
         ]);
     }
 
@@ -146,7 +244,7 @@ class ExamSessionController extends Controller
         event(ExamSessionProgressUpdated::fromParticipation($examParticipation));
         Inertia::flash('toast', ['type' => 'success', 'message' => 'Examen terminé.']);
 
-        return redirect()->route('student.exam-sessions.index');
+        return redirect()->route('student.exam-sessions.show', $examParticipation);
     }
 
     public function state(Request $request, ExamParticipation $examParticipation): JsonResponse

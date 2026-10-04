@@ -117,24 +117,28 @@ export default function StudentExamSessionsIndex({
                                                 ]
                                             }
                                         </Badge>
-                                        {participation.joined_at !== null &&
-                                            (participation.session_status !==
-                                                'closed' ||
-                                                participation.status ===
-                                                    'completed') && (
+                                        {(participation.status === 'completed' || participation.session_status === 'closed') && (
+                                            <Button variant="outline" size="sm" asChild>
+                                                <Link href={examSessions.show(participation.id)}>
+                                                    Voir les résultats
+                                                </Link>
+                                            </Button>
+                                        )}
+                                        {participation.status !== 'completed' &&
+                                            participation.session_status !== 'closed' &&
+                                            participation.joined_at !== null &&
+                                            (
                                                 <Button
                                                     variant="outline"
                                                     size="sm"
                                                     asChild
                                                 >
                                                     <Link
-                                                        href={examSessions.show(
-                                                            participation.id,
-                                                        )}
+                                                        href={examSessions.show(participation.id)}
                                                     >
-                                                        {participation.status ===
+                                                        {String(participation.status) ===
                                                         'completed'
-                                                            ? 'Consulter'
+                                                            ? 'Voir les résultats'
                                                             : 'Reprendre'}
                                                     </Link>
                                                 </Button>

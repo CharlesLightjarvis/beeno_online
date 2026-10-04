@@ -67,10 +67,15 @@ class ExamSessionController extends Controller
     public function show(ExamSession $examSession): Response
     {
         $this->authorize('view', $examSession);
-        $examSession->load('participations.student');
+        $examSession->load(
+            'parts.tasks.choices',
+            'participations.student',
+            'participations.responses.choice',
+            'participations.responses.task.part',
+        );
 
         return Inertia::render('teacher/exam-sessions/overview', [
-            'session' => $this->sessionSummary($examSession),
+            'session' => $this->sessionSummary($examSession, includeProgress: true),
         ]);
     }
 
@@ -177,6 +182,26 @@ class ExamSessionController extends Controller
                             ->all(),
                         'total_tasks' => $part->tasks->count(),
                     ])->all();
+
+                    $data['scores'] = collect(['lesen', 'hoeren', 'schreiben', 'sprechen'])
+                        ->mapWithKeys(function (string $module) use ($examSession, $participation): array {
+                            $tasks = $examSession->parts
+                                ->where('module', $module)
+                                ->flatMap->tasks;
+                            $choiceTasks = $tasks->where('response_type', 'choice');
+                            $correct = $choiceTasks->filter(fn ($task): bool =>
+                                $participation->responses
+                                    ->firstWhere('task_id', $task->id)
+                                    ?->choice
+                                    ?->is_correct === true
+                            )->count();
+
+                            return [$module => [
+                                'available' => $choiceTasks->isNotEmpty(),
+                                'correct' => $correct,
+                                'total' => $choiceTasks->count(),
+                            ]];
+                        })->all();
                 }
 
                 return $data;

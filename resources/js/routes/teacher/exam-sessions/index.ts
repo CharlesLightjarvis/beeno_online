@@ -314,7 +314,7 @@ show.head = (args: { exam_session: string | { id: string } } | [exam_session: st
     show.form = showForm
 /**
 * @see \App\Http\Controllers\Teacher\ExamSessionController::run
- * @see app/Http/Controllers/Teacher/ExamSessionController.php:77
+ * @see app/Http/Controllers/Teacher/ExamSessionController.php:82
  * @route '/teacher/exam-sessions/{examSession}/run'
  */
 export const run = (args: { examSession: string | { id: string } } | [examSession: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -329,7 +329,7 @@ run.definition = {
 
 /**
 * @see \App\Http\Controllers\Teacher\ExamSessionController::run
- * @see app/Http/Controllers/Teacher/ExamSessionController.php:77
+ * @see app/Http/Controllers/Teacher/ExamSessionController.php:82
  * @route '/teacher/exam-sessions/{examSession}/run'
  */
 run.url = (args: { examSession: string | { id: string } } | [examSession: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions) => {
@@ -362,7 +362,7 @@ run.url = (args: { examSession: string | { id: string } } | [examSession: string
 
 /**
 * @see \App\Http\Controllers\Teacher\ExamSessionController::run
- * @see app/Http/Controllers/Teacher/ExamSessionController.php:77
+ * @see app/Http/Controllers/Teacher/ExamSessionController.php:82
  * @route '/teacher/exam-sessions/{examSession}/run'
  */
 run.get = (args: { examSession: string | { id: string } } | [examSession: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -371,7 +371,7 @@ run.get = (args: { examSession: string | { id: string } } | [examSession: string
 })
 /**
 * @see \App\Http\Controllers\Teacher\ExamSessionController::run
- * @see app/Http/Controllers/Teacher/ExamSessionController.php:77
+ * @see app/Http/Controllers/Teacher/ExamSessionController.php:82
  * @route '/teacher/exam-sessions/{examSession}/run'
  */
 run.head = (args: { examSession: string | { id: string } } | [examSession: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -381,7 +381,7 @@ run.head = (args: { examSession: string | { id: string } } | [examSession: strin
 
     /**
 * @see \App\Http\Controllers\Teacher\ExamSessionController::run
- * @see app/Http/Controllers/Teacher/ExamSessionController.php:77
+ * @see app/Http/Controllers/Teacher/ExamSessionController.php:82
  * @route '/teacher/exam-sessions/{examSession}/run'
  */
     const runForm = (args: { examSession: string | { id: string } } | [examSession: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -391,7 +391,7 @@ run.head = (args: { examSession: string | { id: string } } | [examSession: strin
 
             /**
 * @see \App\Http\Controllers\Teacher\ExamSessionController::run
- * @see app/Http/Controllers/Teacher/ExamSessionController.php:77
+ * @see app/Http/Controllers/Teacher/ExamSessionController.php:82
  * @route '/teacher/exam-sessions/{examSession}/run'
  */
         runForm.get = (args: { examSession: string | { id: string } } | [examSession: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -400,7 +400,7 @@ run.head = (args: { examSession: string | { id: string } } | [examSession: strin
         })
             /**
 * @see \App\Http\Controllers\Teacher\ExamSessionController::run
- * @see app/Http/Controllers/Teacher/ExamSessionController.php:77
+ * @see app/Http/Controllers/Teacher/ExamSessionController.php:82
  * @route '/teacher/exam-sessions/{examSession}/run'
  */
         runForm.head = (args: { examSession: string | { id: string } } | [examSession: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -416,7 +416,7 @@ run.head = (args: { examSession: string | { id: string } } | [examSession: strin
     run.form = runForm
 /**
 * @see \App\Http\Controllers\Teacher\ExamSessionController::start
- * @see app/Http/Controllers/Teacher/ExamSessionController.php:114
+ * @see app/Http/Controllers/Teacher/ExamSessionController.php:119
  * @route '/teacher/exam-sessions/{examSession}/start'
  */
 export const start = (args: { examSession: string | { id: string } } | [examSession: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -431,7 +431,7 @@ start.definition = {
 
 /**
 * @see \App\Http\Controllers\Teacher\ExamSessionController::start
- * @see app/Http/Controllers/Teacher/ExamSessionController.php:114
+ * @see app/Http/Controllers/Teacher/ExamSessionController.php:119
  * @route '/teacher/exam-sessions/{examSession}/start'
  */
 start.url = (args: { examSession: string | { id: string } } | [examSession: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions) => {
@@ -464,7 +464,7 @@ start.url = (args: { examSession: string | { id: string } } | [examSession: stri
 
 /**
 * @see \App\Http\Controllers\Teacher\ExamSessionController::start
- * @see app/Http/Controllers/Teacher/ExamSessionController.php:114
+ * @see app/Http/Controllers/Teacher/ExamSessionController.php:119
  * @route '/teacher/exam-sessions/{examSession}/start'
  */
 start.post = (args: { examSession: string | { id: string } } | [examSession: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -474,7 +474,7 @@ start.post = (args: { examSession: string | { id: string } } | [examSession: str
 
     /**
 * @see \App\Http\Controllers\Teacher\ExamSessionController::start
- * @see app/Http/Controllers/Teacher/ExamSessionController.php:114
+ * @see app/Http/Controllers/Teacher/ExamSessionController.php:119
  * @route '/teacher/exam-sessions/{examSession}/start'
  */
     const startForm = (args: { examSession: string | { id: string } } | [examSession: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -484,7 +484,7 @@ start.post = (args: { examSession: string | { id: string } } | [examSession: str
 
             /**
 * @see \App\Http\Controllers\Teacher\ExamSessionController::start
- * @see app/Http/Controllers/Teacher/ExamSessionController.php:114
+ * @see app/Http/Controllers/Teacher/ExamSessionController.php:119
  * @route '/teacher/exam-sessions/{examSession}/start'
  */
         startForm.post = (args: { examSession: string | { id: string } } | [examSession: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -495,7 +495,7 @@ start.post = (args: { examSession: string | { id: string } } | [examSession: str
     start.form = startForm
 /**
 * @see \App\Http\Controllers\Teacher\ExamSessionController::advance
- * @see app/Http/Controllers/Teacher/ExamSessionController.php:131
+ * @see app/Http/Controllers/Teacher/ExamSessionController.php:136
  * @route '/teacher/exam-sessions/{examSession}/advance'
  */
 export const advance = (args: { examSession: string | { id: string } } | [examSession: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -510,7 +510,7 @@ advance.definition = {
 
 /**
 * @see \App\Http\Controllers\Teacher\ExamSessionController::advance
- * @see app/Http/Controllers/Teacher/ExamSessionController.php:131
+ * @see app/Http/Controllers/Teacher/ExamSessionController.php:136
  * @route '/teacher/exam-sessions/{examSession}/advance'
  */
 advance.url = (args: { examSession: string | { id: string } } | [examSession: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions) => {
@@ -543,7 +543,7 @@ advance.url = (args: { examSession: string | { id: string } } | [examSession: st
 
 /**
 * @see \App\Http\Controllers\Teacher\ExamSessionController::advance
- * @see app/Http/Controllers/Teacher/ExamSessionController.php:131
+ * @see app/Http/Controllers/Teacher/ExamSessionController.php:136
  * @route '/teacher/exam-sessions/{examSession}/advance'
  */
 advance.post = (args: { examSession: string | { id: string } } | [examSession: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -553,7 +553,7 @@ advance.post = (args: { examSession: string | { id: string } } | [examSession: s
 
     /**
 * @see \App\Http\Controllers\Teacher\ExamSessionController::advance
- * @see app/Http/Controllers/Teacher/ExamSessionController.php:131
+ * @see app/Http/Controllers/Teacher/ExamSessionController.php:136
  * @route '/teacher/exam-sessions/{examSession}/advance'
  */
     const advanceForm = (args: { examSession: string | { id: string } } | [examSession: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -563,7 +563,7 @@ advance.post = (args: { examSession: string | { id: string } } | [examSession: s
 
             /**
 * @see \App\Http\Controllers\Teacher\ExamSessionController::advance
- * @see app/Http/Controllers/Teacher/ExamSessionController.php:131
+ * @see app/Http/Controllers/Teacher/ExamSessionController.php:136
  * @route '/teacher/exam-sessions/{examSession}/advance'
  */
         advanceForm.post = (args: { examSession: string | { id: string } } | [examSession: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -574,7 +574,7 @@ advance.post = (args: { examSession: string | { id: string } } | [examSession: s
     advance.form = advanceForm
 /**
 * @see \App\Http\Controllers\Teacher\ExamSessionController::open
- * @see app/Http/Controllers/Teacher/ExamSessionController.php:196
+ * @see app/Http/Controllers/Teacher/ExamSessionController.php:221
  * @route '/teacher/exam-sessions/{examSession}/open'
  */
 export const open = (args: { examSession: string | { id: string } } | [examSession: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -589,7 +589,7 @@ open.definition = {
 
 /**
 * @see \App\Http\Controllers\Teacher\ExamSessionController::open
- * @see app/Http/Controllers/Teacher/ExamSessionController.php:196
+ * @see app/Http/Controllers/Teacher/ExamSessionController.php:221
  * @route '/teacher/exam-sessions/{examSession}/open'
  */
 open.url = (args: { examSession: string | { id: string } } | [examSession: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions) => {
@@ -622,7 +622,7 @@ open.url = (args: { examSession: string | { id: string } } | [examSession: strin
 
 /**
 * @see \App\Http\Controllers\Teacher\ExamSessionController::open
- * @see app/Http/Controllers/Teacher/ExamSessionController.php:196
+ * @see app/Http/Controllers/Teacher/ExamSessionController.php:221
  * @route '/teacher/exam-sessions/{examSession}/open'
  */
 open.post = (args: { examSession: string | { id: string } } | [examSession: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -632,7 +632,7 @@ open.post = (args: { examSession: string | { id: string } } | [examSession: stri
 
     /**
 * @see \App\Http\Controllers\Teacher\ExamSessionController::open
- * @see app/Http/Controllers/Teacher/ExamSessionController.php:196
+ * @see app/Http/Controllers/Teacher/ExamSessionController.php:221
  * @route '/teacher/exam-sessions/{examSession}/open'
  */
     const openForm = (args: { examSession: string | { id: string } } | [examSession: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -642,7 +642,7 @@ open.post = (args: { examSession: string | { id: string } } | [examSession: stri
 
             /**
 * @see \App\Http\Controllers\Teacher\ExamSessionController::open
- * @see app/Http/Controllers/Teacher/ExamSessionController.php:196
+ * @see app/Http/Controllers/Teacher/ExamSessionController.php:221
  * @route '/teacher/exam-sessions/{examSession}/open'
  */
         openForm.post = (args: { examSession: string | { id: string } } | [examSession: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -653,7 +653,7 @@ open.post = (args: { examSession: string | { id: string } } | [examSession: stri
     open.form = openForm
 /**
 * @see \App\Http\Controllers\Teacher\ExamSessionController::close
- * @see app/Http/Controllers/Teacher/ExamSessionController.php:206
+ * @see app/Http/Controllers/Teacher/ExamSessionController.php:231
  * @route '/teacher/exam-sessions/{examSession}/close'
  */
 export const close = (args: { examSession: string | { id: string } } | [examSession: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -668,7 +668,7 @@ close.definition = {
 
 /**
 * @see \App\Http\Controllers\Teacher\ExamSessionController::close
- * @see app/Http/Controllers/Teacher/ExamSessionController.php:206
+ * @see app/Http/Controllers/Teacher/ExamSessionController.php:231
  * @route '/teacher/exam-sessions/{examSession}/close'
  */
 close.url = (args: { examSession: string | { id: string } } | [examSession: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions) => {
@@ -701,7 +701,7 @@ close.url = (args: { examSession: string | { id: string } } | [examSession: stri
 
 /**
 * @see \App\Http\Controllers\Teacher\ExamSessionController::close
- * @see app/Http/Controllers/Teacher/ExamSessionController.php:206
+ * @see app/Http/Controllers/Teacher/ExamSessionController.php:231
  * @route '/teacher/exam-sessions/{examSession}/close'
  */
 close.post = (args: { examSession: string | { id: string } } | [examSession: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -711,7 +711,7 @@ close.post = (args: { examSession: string | { id: string } } | [examSession: str
 
     /**
 * @see \App\Http\Controllers\Teacher\ExamSessionController::close
- * @see app/Http/Controllers/Teacher/ExamSessionController.php:206
+ * @see app/Http/Controllers/Teacher/ExamSessionController.php:231
  * @route '/teacher/exam-sessions/{examSession}/close'
  */
     const closeForm = (args: { examSession: string | { id: string } } | [examSession: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -721,7 +721,7 @@ close.post = (args: { examSession: string | { id: string } } | [examSession: str
 
             /**
 * @see \App\Http\Controllers\Teacher\ExamSessionController::close
- * @see app/Http/Controllers/Teacher/ExamSessionController.php:206
+ * @see app/Http/Controllers/Teacher/ExamSessionController.php:231
  * @route '/teacher/exam-sessions/{examSession}/close'
  */
         closeForm.post = (args: { examSession: string | { id: string } } | [examSession: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -732,7 +732,7 @@ close.post = (args: { examSession: string | { id: string } } | [examSession: str
     close.form = closeForm
 /**
 * @see \App\Http\Controllers\Teacher\ExamSessionController::readingMaterial
- * @see app/Http/Controllers/Teacher/ExamSessionController.php:187
+ * @see app/Http/Controllers/Teacher/ExamSessionController.php:212
  * @route '/teacher/exam-sessions/{examSession}/reading-material'
  */
 export const readingMaterial = (args: { examSession: string | { id: string } } | [examSession: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -747,7 +747,7 @@ readingMaterial.definition = {
 
 /**
 * @see \App\Http\Controllers\Teacher\ExamSessionController::readingMaterial
- * @see app/Http/Controllers/Teacher/ExamSessionController.php:187
+ * @see app/Http/Controllers/Teacher/ExamSessionController.php:212
  * @route '/teacher/exam-sessions/{examSession}/reading-material'
  */
 readingMaterial.url = (args: { examSession: string | { id: string } } | [examSession: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions) => {
@@ -780,7 +780,7 @@ readingMaterial.url = (args: { examSession: string | { id: string } } | [examSes
 
 /**
 * @see \App\Http\Controllers\Teacher\ExamSessionController::readingMaterial
- * @see app/Http/Controllers/Teacher/ExamSessionController.php:187
+ * @see app/Http/Controllers/Teacher/ExamSessionController.php:212
  * @route '/teacher/exam-sessions/{examSession}/reading-material'
  */
 readingMaterial.post = (args: { examSession: string | { id: string } } | [examSession: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -790,7 +790,7 @@ readingMaterial.post = (args: { examSession: string | { id: string } } | [examSe
 
     /**
 * @see \App\Http\Controllers\Teacher\ExamSessionController::readingMaterial
- * @see app/Http/Controllers/Teacher/ExamSessionController.php:187
+ * @see app/Http/Controllers/Teacher/ExamSessionController.php:212
  * @route '/teacher/exam-sessions/{examSession}/reading-material'
  */
     const readingMaterialForm = (args: { examSession: string | { id: string } } | [examSession: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -800,7 +800,7 @@ readingMaterial.post = (args: { examSession: string | { id: string } } | [examSe
 
             /**
 * @see \App\Http\Controllers\Teacher\ExamSessionController::readingMaterial
- * @see app/Http/Controllers/Teacher/ExamSessionController.php:187
+ * @see app/Http/Controllers/Teacher/ExamSessionController.php:212
  * @route '/teacher/exam-sessions/{examSession}/reading-material'
  */
         readingMaterialForm.post = (args: { examSession: string | { id: string } } | [examSession: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
