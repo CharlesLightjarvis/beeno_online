@@ -13,9 +13,9 @@ use Illuminate\Validation\ValidationException;
 
 class SaveExamResponse
 {
-    public function handle(ExamParticipation $participation, string $taskId, string $choiceId): ExamResponse
+    public function handle(ExamParticipation $participation, string $taskId, ?string $choiceId = null, ?string $answerText = null): ExamResponse
     {
-        return DB::transaction(function () use ($participation, $taskId, $choiceId): ExamResponse {
+        return DB::transaction(function () use ($participation, $taskId, $choiceId, $answerText): ExamResponse {
             $lockedParticipation = ExamParticipation::query()
                 ->whereKey($participation->id)
                 ->lockForUpdate()
@@ -33,15 +33,28 @@ class SaveExamResponse
                 ->whereKey($taskId)
                 ->whereHas('part', fn ($query) => $query->where('exam_session_id', $lockedParticipation->exam_session_id))
                 ->first();
-            $choice = ExamSessionChoice::query()->whereKey($choiceId)->where('task_id', $taskId)->first();
+            if (! $task) {
+                throw ValidationException::withMessages(['task_id' => 'Cette question ne correspond pas à cette session.']);
+            }
 
-            if (! $task || ! $choice) {
+            if ($task->response_type === 'text') {
+                if ($answerText === null || trim($answerText) === '') {
+                    throw ValidationException::withMessages(['answer_text' => 'Saisissez une réponse.']);
+                }
+            } else {
+                $choice = ExamSessionChoice::query()->whereKey($choiceId)->where('task_id', $taskId)->first();
+                if (! $choice) {
+                    throw ValidationException::withMessages(['choice_id' => 'Ce choix ne correspond pas à cette question.']);
+                }
+            }
+
+            if ($task->response_type !== 'text' && ! $choiceId) {
                 throw ValidationException::withMessages(['choice_id' => 'Ce choix ne correspond pas à cette question.']);
             }
 
             $response = ExamResponse::query()->updateOrCreate(
                 ['participation_id' => $lockedParticipation->id, 'task_id' => $task->id],
-                ['choice_id' => $choice->id, 'answered_at' => now()],
+                ['choice_id' => $choiceId, 'answer_text' => $answerText, 'answered_at' => now()],
             );
             $lockedParticipation->update([
                 'status' => ExamParticipationStatus::InProgress,

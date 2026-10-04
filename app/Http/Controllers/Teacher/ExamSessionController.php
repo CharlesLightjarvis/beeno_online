@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Teacher;
 
 use App\Actions\Teacher\CloseExamSession;
+use App\Actions\Teacher\AdvanceExamSessionModule;
 use App\Actions\Teacher\CreateExamSession;
 use App\Actions\Teacher\OpenExamSession;
 use App\Actions\Teacher\SetExamSessionDisplayMaterial;
@@ -81,17 +82,22 @@ class ExamSessionController extends Controller
         $examSession->load('parts.readingMaterials', 'parts.tasks.choices', 'participations.student', 'participations.responses.task.part');
         $parts = $examSession->parts->map(fn ($part): array => [
             'id' => (string) $part->id,
+            'module' => (string) $part->module,
+            'module_position' => (int) $part->module_position,
             'part_number' => (int) $part->part_number,
             'instructions' => $part->instructions === null ? null : (string) $part->instructions,
-            'reading_materials' => (int) $part->part_number === 2 ? [] : $part->readingMaterials->map(fn ($material): array => [
+            'reading_materials' => $part->readingMaterials->map(fn ($material): array => [
                 'id' => (string) $material->id,
                 'position' => (int) $material->position,
                 'body' => (string) $material->body,
+                'media_type' => (string) $material->media_type,
+                'media_url' => $material->media_url,
             ])->all(),
             'tasks' => $part->tasks->map(fn ($task): array => [
                 'id' => (string) $task->id,
                 'position' => (int) $task->position,
                 'prompt' => $task->prompt === null ? null : (string) $task->prompt,
+                'response_type' => (string) $task->response_type,
                 'choices' => $task->choices->map(fn ($choice): array => [
                     'label' => (string) $choice->label,
                     'body' => $choice->body === null ? null : (string) $choice->body,
@@ -113,11 +119,21 @@ class ExamSessionController extends Controller
         $started = ExamSession::query()
             ->whereKey($examSession->getKey())
             ->whereNull('started_at')
-            ->update(['started_at' => now()]);
+            ->update(['started_at' => now(), 'active_module' => $examSession->active_module ?? 'lesen']);
 
         if ($started > 0) {
             event(ExamSessionStateChanged::fromSession($examSession->refresh()));
         }
+
+        return redirect()->route('teacher.exam-sessions.run', $examSession);
+    }
+
+    public function advance(ExamSession $examSession, AdvanceExamSessionModule $advance): RedirectResponse
+    {
+        $this->authorize('view', $examSession);
+        $examSession = $advance->handle($examSession);
+        event(ExamSessionStateChanged::fromSession($examSession));
+        Inertia::flash('toast', ['type' => 'success', 'message' => 'Module suivant activé.']);
 
         return redirect()->route('teacher.exam-sessions.run', $examSession);
     }
@@ -132,6 +148,7 @@ class ExamSessionController extends Controller
             'status' => $examSession->status->value,
             'opened_at' => $examSession->opened_at,
             'started_at' => $examSession->started_at,
+            'active_module' => $examSession->active_module,
             'closed_at' => $examSession->closed_at,
             'participations' => $examSession->participations->map(function ($participation) use ($examSession, $includeProgress): array {
                 $student = [
@@ -149,6 +166,7 @@ class ExamSessionController extends Controller
 
                 if ($includeProgress) {
                     $data['progress'] = $examSession->parts->map(fn ($part): array => [
+                        'module' => (string) $part->module,
                         'part_number' => (int) $part->part_number,
                         'answered_task_positions' => $participation->responses
                             ->filter(fn ($response): bool => $response->task?->part_id === $part->id)

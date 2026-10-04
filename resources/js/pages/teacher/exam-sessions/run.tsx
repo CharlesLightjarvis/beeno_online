@@ -11,6 +11,12 @@ import examSessions from '@/routes/teacher/exam-sessions';
 import type { ExamSessionDetail, TeacherExamPart } from '@/types';
 
 const pageSize = 6;
+const moduleLabels: Record<string, string> = {
+    lesen: 'Lesen',
+    hoeren: 'Hören',
+    schreiben: 'Schreiben',
+    sprechen: 'Sprechen',
+};
 
 export default function ExamSessionRun({
     session,
@@ -19,9 +25,7 @@ export default function ExamSessionRun({
     session: ExamSessionDetail;
     parts: TeacherExamPart[];
 }) {
-    const [activePartNumber, setActivePartNumber] = useState(
-        parts[0]?.part_number ?? 1,
-    );
+    const [activePartId, setActivePartId] = useState(parts[0]?.id ?? '');
     const [studentPage, setStudentPage] = useState(0);
     const [lastSeen, setLastSeen] = useState<Record<string, string | null>>(
         () =>
@@ -41,8 +45,20 @@ export default function ExamSessionRun({
         import.meta.env.VITE_REVERB_APP_KEY && import.meta.env.VITE_REVERB_HOST,
     );
     const previousConnection = useRef(connection);
+    const activePosition = parts.find(
+        (part) => part.module === session.active_module,
+    )?.module_position ?? 0;
+    const visibleParts = parts.filter(
+        (part) => session.active_module === null || (part.module_position ?? 0) <= activePosition,
+    );
+    const navigationParts = visibleParts.filter(
+        (part, index, all) => part.module !== 'hoeren' || all.findIndex((item) => item.module === 'hoeren') === index,
+    );
     const activePart =
-        parts.find((part) => part.part_number === activePartNumber) ?? parts[0];
+        visibleParts.find((part) => part.id === activePartId) ?? visibleParts[0];
+    const nextPart = parts.find(
+        (part) => (part.module_position ?? 0) > activePosition,
+    );
     const pageCount = Math.max(
         1,
         Math.ceil(session.participations.length / pageSize),
@@ -198,6 +214,14 @@ export default function ExamSessionRun({
                             Terminer l’examen
                         </Button>
                     )}
+                    {session.status === 'open' && session.started_at && nextPart && (
+                        <Button
+                            size="sm"
+                            onClick={() => router.post(`/teacher/exam-sessions/${session.id}/advance`)}
+                        >
+                            Passer à {moduleLabels[nextPart.module] ?? nextPart.module}
+                        </Button>
+                    )}
                 </div>
             </header>
 
@@ -209,22 +233,22 @@ export default function ExamSessionRun({
                     role="tablist"
                     className="flex w-full gap-1 rounded-md bg-muted p-1"
                 >
-                    {parts.map((part) => (
+                    {navigationParts.map((part) => (
                         <button
                             key={part.id}
-                            id={`teil-tab-${part.part_number}`}
+                            id={`teil-tab-${part.id}`}
                             type="button"
                             role="tab"
-                            aria-controls={`teil-panel-${part.part_number}`}
+                            aria-controls={`teil-panel-${part.id}`}
                             aria-selected={
-                                part.part_number === activePartNumber
+                                part.id === activePart.id
                             }
                             onClick={() =>
-                                setActivePartNumber(part.part_number)
+                                setActivePartId(part.id)
                             }
-                            className={`flex min-w-0 flex-1 items-center justify-center gap-1 rounded-sm px-2 py-2 text-sm font-medium transition-colors sm:px-3 ${part.part_number === activePartNumber ? 'bg-background shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                            className={`flex min-w-0 flex-1 items-center justify-center gap-1 rounded-sm px-2 py-2 text-sm font-medium transition-colors sm:px-3 ${part.id === activePart.id ? 'bg-background shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
                         >
-                            <span>Teil {part.part_number}</span>
+                            <span>{part.module === 'hoeren' ? moduleLabels[part.module] : `${moduleLabels[part.module] ?? part.module} · Teil ${part.part_number}`}</span>
                             <span className="text-xs text-muted-foreground">
                                 ({part.tasks.length})
                             </span>
@@ -236,25 +260,42 @@ export default function ExamSessionRun({
             <div className="grid flex-1 lg:min-h-0 lg:grid-cols-[minmax(0,1fr)_320px]">
                 <section className="flex min-w-0 flex-col lg:min-h-0">
                     <div
-                        id={`teil-panel-${activePart.part_number}`}
+                        id={`teil-panel-${activePart.id}`}
                         role="tabpanel"
-                        aria-labelledby={`teil-tab-${activePart.part_number}`}
+                        aria-labelledby={`teil-tab-${activePart.id}`}
                         className="min-w-0 space-y-5 p-4 sm:p-6 lg:min-h-0 lg:flex-1 lg:overflow-y-auto"
                     >
                         <div>
                             <h2 className="text-xl font-semibold">
-                                Teil {activePart.part_number}
+                                {activePart.module === 'hoeren' ? 'Hören' : activePart.module === 'schreiben' ? 'Schreiben' : `Teil ${activePart.part_number}`}
                             </h2>
-                            {activePart.instructions && (
+                            {activePart.instructions && activePart.module !== 'hoeren' && activePart.module !== 'schreiben' && (
                                 <p className="mt-1 text-sm text-muted-foreground">
                                     {activePart.instructions}
                                 </p>
                             )}
                         </div>
 
+                        {activePart.module === 'hoeren' && activePart.reading_materials[0]?.media_url && (
+                            <div className="rounded-md border p-4">
+                                <h3 className="mb-3 font-semibold">Audio Hören</h3>
+                                <audio className="w-full" controls preload="metadata" src={activePart.reading_materials[0].media_url}>
+                                    Votre navigateur ne peut pas lire cet audio.
+                                </audio>
+                            </div>
+                        )}
+
+                        {activePart.module === 'schreiben' && activePart.tasks[0] && (
+                            <article className="rounded-md border p-4 sm:p-6">
+                                <MdxContentEditor id={`run-schreiben-${activePart.tasks[0].id}`} markdown={activePart.tasks[0].prompt ?? ''} onChange={() => {}} readOnly />
+                            </article>
+                        )}
+
                         <div
                             className={
-                                activePart.part_number === 1 ||
+                                activePart.module === 'hoeren' || activePart.module === 'schreiben'
+                                    ? 'hidden'
+                                    : activePart.part_number === 1 ||
                                 activePart.part_number === 3
                                     ? 'grid gap-4 sm:grid-cols-2'
                                     : 'space-y-5'
@@ -283,7 +324,7 @@ export default function ExamSessionRun({
                             )}
                         </div>
 
-                        {activePart.part_number === 2 &&
+                        {activePart.module !== 'hoeren' && activePart.module !== 'schreiben' && activePart.part_number === 2 &&
                             activePart.tasks.map((task) => (
                                 <section key={task.id} className="space-y-3">
                                     <h3 className="font-semibold">
@@ -312,7 +353,7 @@ export default function ExamSessionRun({
                                 </section>
                             ))}
 
-                        {activePart.reading_materials.length === 0 &&
+                        {activePart.module !== 'hoeren' && activePart.module !== 'schreiben' && activePart.reading_materials.length === 0 &&
                             activePart.part_number !== 2 && (
                                 <p className="rounded-md border border-dashed p-5 text-sm text-muted-foreground">
                                     Aucun texte n’est associé à cette partie.
@@ -418,11 +459,14 @@ export default function ExamSessionRun({
                                             aria-label={`${answeredTotal} réponse(s) sur ${taskTotal}`}
                                         >
                                             {participation.progress?.map(
-                                                (part) => (
-                                                    <div
-                                                        key={part.part_number}
-                                                        className="flex items-center gap-1.5"
-                                                    >
+                                                (part, index) => (
+                                                    <div key={`${part.module}-${part.part_number}`}>
+                                                        {(index === 0 || participation.progress?.[index - 1]?.module !== part.module) && (
+                                                            <h4 className="mb-1 mt-2 text-xs font-semibold text-foreground">
+                                                                {moduleLabels[part.module] ?? part.module}
+                                                            </h4>
+                                                        )}
+                                                        <div className="flex items-center gap-1.5">
                                                         <span className="w-5 text-[10px] text-muted-foreground">
                                                             T{part.part_number}
                                                         </span>
@@ -460,6 +504,7 @@ export default function ExamSessionRun({
                                                                     );
                                                                 },
                                                             )}
+                                                        </div>
                                                         </div>
                                                     </div>
                                                 ),

@@ -23,7 +23,8 @@ class SaveExamResponseRequest extends FormRequest
     {
         return [
             'task_id' => ['required', 'uuid', Rule::exists('exam_session_tasks', 'id')],
-            'choice_id' => ['required', 'uuid', Rule::exists('exam_session_choices', 'id')],
+            'choice_id' => ['nullable', 'uuid', 'required_without:answer_text', Rule::exists('exam_session_choices', 'id')],
+            'answer_text' => ['nullable', 'string', 'max:10000', 'required_without:choice_id'],
         ];
     }
 }

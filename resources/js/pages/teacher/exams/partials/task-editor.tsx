@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import type { ExamReadingMaterial, ExamTask } from '@/types';
 import ChoiceCardEditor from './choice-card-editor';
 
-export default function TaskEditor({ partNumber, partIndex, taskIndex, errors, task, materialOptions, onChange, onRemove }: { partNumber: number; partIndex: number; taskIndex: number; errors: Record<string, string>; task: ExamTask; materialOptions: ExamReadingMaterial[]; onChange: (task: ExamTask) => void; onRemove: () => void }) {
+export default function TaskEditor({ module = 'lesen', partNumber, partIndex, taskIndex, errors, task, materialOptions, onChange, onRemove }: { module?: string; partNumber: number; partIndex: number; taskIndex: number; errors: Record<string, string>; task: ExamTask; materialOptions: ExamReadingMaterial[]; onChange: (task: ExamTask) => void; onRemove: () => void }) {
     const error = (path: string) => errors[`parts.${partIndex}.tasks.${taskIndex}.${path}`];
     const updateChoice = (index: number, choice: ExamTask['choices'][number]) => onChange({ ...task, choices: task.choices.map((item, i) => i === index ? choice : item) });
 
@@ -15,7 +15,24 @@ export default function TaskEditor({ partNumber, partIndex, taskIndex, errors, t
         onChange({ ...task, reading_material_id: material?.id ?? null, reading_material_position: position });
     };
 
-    const questionNumber = (partNumber - 1) * 5 + task.position;
+    const questionNumber = `${module} ${partNumber}.${task.position}`;
+
+    if (module === 'hoeren' && partNumber === 2) {
+        return <section className="space-y-4 rounded-lg border p-4">
+            <div className="flex items-center justify-between"><h3 className="font-semibold">Question {questionNumber}</h3><Button type="button" variant="ghost" size="sm" onClick={onRemove}><Trash2 className="mr-2 size-4" />Supprimer</Button></div>
+            <div className="space-y-2"><Label htmlFor={`prompt-${partNumber}-${task.position}`}>Question / affirmation</Label><Input id={`prompt-${partNumber}-${task.position}`} value={task.prompt} onChange={(event) => onChange({ ...task, prompt: event.target.value })} /><InputError message={error('prompt')} /></div>
+            <fieldset className="space-y-3"><legend className="text-sm font-medium">Réponse correcte</legend>{task.choices.map((choice) => <label key={choice.label} className="flex items-center gap-3 rounded-md border p-3"><input type="radio" name={`correct-${module}-${partNumber}-${task.position}`} checked={choice.is_correct} onChange={() => onChange({ ...task, choices: task.choices.map((item) => ({ ...item, is_correct: item.label === choice.label })) })} />{choice.label}</label>)}<InputError message={error('choices')} /></fieldset>
+        </section>;
+    }
+
+    if (module === 'hoeren') {
+        return <section className="space-y-4 rounded-lg border p-4">
+            <div className="flex items-center justify-between"><h3 className="font-semibold">Question {questionNumber}</h3><Button type="button" variant="ghost" size="sm" onClick={onRemove}><Trash2 className="mr-2 size-4" />Supprimer</Button></div>
+            {materialOptions.length > 0 && <div className="space-y-2"><Label htmlFor={`material-${partNumber}-${task.position}`}>Support audio</Label><select id={`material-${partNumber}-${task.position}`} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" value={task.reading_material_position ?? materialOptions.find((material) => material.id === task.reading_material_id)?.position ?? ''} onChange={(event) => updateMaterial(Number(event.target.value) || null)}><option value="">Choisir le support</option>{materialOptions.map((material, index) => <option key={material.id ?? material.position} value={material.position}>Audio {index + 1}</option>)}</select></div>}
+            <div className="space-y-2"><Label htmlFor={`prompt-${partNumber}-${task.position}`}>Question / affirmation</Label><Input id={`prompt-${partNumber}-${task.position}`} value={task.prompt} onChange={(event) => onChange({ ...task, prompt: event.target.value })} placeholder="Saisissez la question ou l’affirmation" /><InputError message={error('prompt')} /></div>
+            <fieldset className="space-y-3"><legend className="text-sm font-medium">Réponses proposées</legend>{task.choices.map((choice, index) => <div key={choice.label} className="grid gap-2 rounded-md border p-3 sm:grid-cols-[auto_1fr_auto] sm:items-center"><span className="font-semibold">{choice.label}</span><Input value={choice.body ?? ''} placeholder={`Texte de la réponse ${choice.label}`} onChange={(event) => updateChoice(index, { ...choice, body: event.target.value })} /><label className="flex items-center gap-2 text-sm"><input type="radio" name={`correct-${module}-${partNumber}-${task.position}`} checked={choice.is_correct} onChange={() => onChange({ ...task, choices: task.choices.map((item) => ({ ...item, is_correct: item.label === choice.label })) })} />Bonne réponse</label><InputError message={error(`choices.${index}.body`)} /></div>)}<InputError message={error('choices')} /></fieldset>
+        </section>;
+    }
 
     return <section className="space-y-4 rounded-lg border p-4">
         <div className="flex items-center justify-between"><h3 className="font-semibold">Question {questionNumber}</h3><Button type="button" variant="ghost" size="sm" onClick={onRemove}><Trash2 className="mr-2 size-4" />Supprimer</Button></div>

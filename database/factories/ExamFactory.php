@@ -20,6 +20,7 @@ class ExamFactory extends Factory
             'teacher_id' => User::factory(),
             'title' => 'TELC Deutsch A1 – Lesen',
             'level' => 'A1',
+            'module_order' => ['lesen', 'hoeren', 'schreiben', 'sprechen'],
             'status' => ExamStatus::Draft,
         ];
     }

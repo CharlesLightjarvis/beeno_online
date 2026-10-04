@@ -315,7 +315,7 @@ show.head = (args: { examParticipation: string | { id: string } } | [examPartici
     show.form = showForm
 /**
 * @see \App\Http\Controllers\Student\ExamSessionController::state
- * @see app/Http/Controllers/Student/ExamSessionController.php:140
+ * @see app/Http/Controllers/Student/ExamSessionController.php:152
  * @route '/student/exam-sessions/{examParticipation}/state'
  */
 export const state = (args: { examParticipation: string | { id: string } } | [examParticipation: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -330,7 +330,7 @@ state.definition = {
 
 /**
 * @see \App\Http\Controllers\Student\ExamSessionController::state
- * @see app/Http/Controllers/Student/ExamSessionController.php:140
+ * @see app/Http/Controllers/Student/ExamSessionController.php:152
  * @route '/student/exam-sessions/{examParticipation}/state'
  */
 state.url = (args: { examParticipation: string | { id: string } } | [examParticipation: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions) => {
@@ -363,7 +363,7 @@ state.url = (args: { examParticipation: string | { id: string } } | [examPartici
 
 /**
 * @see \App\Http\Controllers\Student\ExamSessionController::state
- * @see app/Http/Controllers/Student/ExamSessionController.php:140
+ * @see app/Http/Controllers/Student/ExamSessionController.php:152
  * @route '/student/exam-sessions/{examParticipation}/state'
  */
 state.get = (args: { examParticipation: string | { id: string } } | [examParticipation: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -372,7 +372,7 @@ state.get = (args: { examParticipation: string | { id: string } } | [examPartici
 })
 /**
 * @see \App\Http\Controllers\Student\ExamSessionController::state
- * @see app/Http/Controllers/Student/ExamSessionController.php:140
+ * @see app/Http/Controllers/Student/ExamSessionController.php:152
  * @route '/student/exam-sessions/{examParticipation}/state'
  */
 state.head = (args: { examParticipation: string | { id: string } } | [examParticipation: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -382,7 +382,7 @@ state.head = (args: { examParticipation: string | { id: string } } | [examPartic
 
     /**
 * @see \App\Http\Controllers\Student\ExamSessionController::state
- * @see app/Http/Controllers/Student/ExamSessionController.php:140
+ * @see app/Http/Controllers/Student/ExamSessionController.php:152
  * @route '/student/exam-sessions/{examParticipation}/state'
  */
     const stateForm = (args: { examParticipation: string | { id: string } } | [examParticipation: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -392,7 +392,7 @@ state.head = (args: { examParticipation: string | { id: string } } | [examPartic
 
             /**
 * @see \App\Http\Controllers\Student\ExamSessionController::state
- * @see app/Http/Controllers/Student/ExamSessionController.php:140
+ * @see app/Http/Controllers/Student/ExamSessionController.php:152
  * @route '/student/exam-sessions/{examParticipation}/state'
  */
         stateForm.get = (args: { examParticipation: string | { id: string } } | [examParticipation: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -401,7 +401,7 @@ state.head = (args: { examParticipation: string | { id: string } } | [examPartic
         })
             /**
 * @see \App\Http\Controllers\Student\ExamSessionController::state
- * @see app/Http/Controllers/Student/ExamSessionController.php:140
+ * @see app/Http/Controllers/Student/ExamSessionController.php:152
  * @route '/student/exam-sessions/{examParticipation}/state'
  */
         stateForm.head = (args: { examParticipation: string | { id: string } } | [examParticipation: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -417,7 +417,7 @@ state.head = (args: { examParticipation: string | { id: string } } | [examPartic
     state.form = stateForm
 /**
 * @see \App\Http\Controllers\Student\ExamSessionController::heartbeat
- * @see app/Http/Controllers/Student/ExamSessionController.php:173
+ * @see app/Http/Controllers/Student/ExamSessionController.php:187
  * @route '/student/exam-sessions/{examParticipation}/heartbeat'
  */
 export const heartbeat = (args: { examParticipation: string | { id: string } } | [examParticipation: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -432,7 +432,7 @@ heartbeat.definition = {
 
 /**
 * @see \App\Http\Controllers\Student\ExamSessionController::heartbeat
- * @see app/Http/Controllers/Student/ExamSessionController.php:173
+ * @see app/Http/Controllers/Student/ExamSessionController.php:187
  * @route '/student/exam-sessions/{examParticipation}/heartbeat'
  */
 heartbeat.url = (args: { examParticipation: string | { id: string } } | [examParticipation: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions) => {
@@ -465,7 +465,7 @@ heartbeat.url = (args: { examParticipation: string | { id: string } } | [examPar
 
 /**
 * @see \App\Http\Controllers\Student\ExamSessionController::heartbeat
- * @see app/Http/Controllers/Student/ExamSessionController.php:173
+ * @see app/Http/Controllers/Student/ExamSessionController.php:187
  * @route '/student/exam-sessions/{examParticipation}/heartbeat'
  */
 heartbeat.post = (args: { examParticipation: string | { id: string } } | [examParticipation: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -475,7 +475,7 @@ heartbeat.post = (args: { examParticipation: string | { id: string } } | [examPa
 
     /**
 * @see \App\Http\Controllers\Student\ExamSessionController::heartbeat
- * @see app/Http/Controllers/Student/ExamSessionController.php:173
+ * @see app/Http/Controllers/Student/ExamSessionController.php:187
  * @route '/student/exam-sessions/{examParticipation}/heartbeat'
  */
     const heartbeatForm = (args: { examParticipation: string | { id: string } } | [examParticipation: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -485,7 +485,7 @@ heartbeat.post = (args: { examParticipation: string | { id: string } } | [examPa
 
             /**
 * @see \App\Http\Controllers\Student\ExamSessionController::heartbeat
- * @see app/Http/Controllers/Student/ExamSessionController.php:173
+ * @see app/Http/Controllers/Student/ExamSessionController.php:187
  * @route '/student/exam-sessions/{examParticipation}/heartbeat'
  */
         heartbeatForm.post = (args: { examParticipation: string | { id: string } } | [examParticipation: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -496,7 +496,7 @@ heartbeat.post = (args: { examParticipation: string | { id: string } } | [examPa
     heartbeat.form = heartbeatForm
 /**
 * @see \App\Http\Controllers\Student\ExamSessionController::saveResponse
- * @see app/Http/Controllers/Student/ExamSessionController.php:116
+ * @see app/Http/Controllers/Student/ExamSessionController.php:128
  * @route '/student/exam-sessions/{examParticipation}/responses'
  */
 export const saveResponse = (args: { examParticipation: string | { id: string } } | [examParticipation: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -511,7 +511,7 @@ saveResponse.definition = {
 
 /**
 * @see \App\Http\Controllers\Student\ExamSessionController::saveResponse
- * @see app/Http/Controllers/Student/ExamSessionController.php:116
+ * @see app/Http/Controllers/Student/ExamSessionController.php:128
  * @route '/student/exam-sessions/{examParticipation}/responses'
  */
 saveResponse.url = (args: { examParticipation: string | { id: string } } | [examParticipation: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions) => {
@@ -544,7 +544,7 @@ saveResponse.url = (args: { examParticipation: string | { id: string } } | [exam
 
 /**
 * @see \App\Http\Controllers\Student\ExamSessionController::saveResponse
- * @see app/Http/Controllers/Student/ExamSessionController.php:116
+ * @see app/Http/Controllers/Student/ExamSessionController.php:128
  * @route '/student/exam-sessions/{examParticipation}/responses'
  */
 saveResponse.post = (args: { examParticipation: string | { id: string } } | [examParticipation: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -554,7 +554,7 @@ saveResponse.post = (args: { examParticipation: string | { id: string } } | [exa
 
     /**
 * @see \App\Http\Controllers\Student\ExamSessionController::saveResponse
- * @see app/Http/Controllers/Student/ExamSessionController.php:116
+ * @see app/Http/Controllers/Student/ExamSessionController.php:128
  * @route '/student/exam-sessions/{examParticipation}/responses'
  */
     const saveResponseForm = (args: { examParticipation: string | { id: string } } | [examParticipation: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -564,7 +564,7 @@ saveResponse.post = (args: { examParticipation: string | { id: string } } | [exa
 
             /**
 * @see \App\Http\Controllers\Student\ExamSessionController::saveResponse
- * @see app/Http/Controllers/Student/ExamSessionController.php:116
+ * @see app/Http/Controllers/Student/ExamSessionController.php:128
  * @route '/student/exam-sessions/{examParticipation}/responses'
  */
         saveResponseForm.post = (args: { examParticipation: string | { id: string } } | [examParticipation: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -575,7 +575,7 @@ saveResponse.post = (args: { examParticipation: string | { id: string } } | [exa
     saveResponse.form = saveResponseForm
 /**
 * @see \App\Http\Controllers\Student\ExamSessionController::finish
- * @see app/Http/Controllers/Student/ExamSessionController.php:130
+ * @see app/Http/Controllers/Student/ExamSessionController.php:142
  * @route '/student/exam-sessions/{examParticipation}/finish'
  */
 export const finish = (args: { examParticipation: string | { id: string } } | [examParticipation: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -590,7 +590,7 @@ finish.definition = {
 
 /**
 * @see \App\Http\Controllers\Student\ExamSessionController::finish
- * @see app/Http/Controllers/Student/ExamSessionController.php:130
+ * @see app/Http/Controllers/Student/ExamSessionController.php:142
  * @route '/student/exam-sessions/{examParticipation}/finish'
  */
 finish.url = (args: { examParticipation: string | { id: string } } | [examParticipation: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions) => {
@@ -623,7 +623,7 @@ finish.url = (args: { examParticipation: string | { id: string } } | [examPartic
 
 /**
 * @see \App\Http\Controllers\Student\ExamSessionController::finish
- * @see app/Http/Controllers/Student/ExamSessionController.php:130
+ * @see app/Http/Controllers/Student/ExamSessionController.php:142
  * @route '/student/exam-sessions/{examParticipation}/finish'
  */
 finish.post = (args: { examParticipation: string | { id: string } } | [examParticipation: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -633,7 +633,7 @@ finish.post = (args: { examParticipation: string | { id: string } } | [examParti
 
     /**
 * @see \App\Http\Controllers\Student\ExamSessionController::finish
- * @see app/Http/Controllers/Student/ExamSessionController.php:130
+ * @see app/Http/Controllers/Student/ExamSessionController.php:142
  * @route '/student/exam-sessions/{examParticipation}/finish'
  */
     const finishForm = (args: { examParticipation: string | { id: string } } | [examParticipation: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -643,7 +643,7 @@ finish.post = (args: { examParticipation: string | { id: string } } | [examParti
 
             /**
 * @see \App\Http\Controllers\Student\ExamSessionController::finish
- * @see app/Http/Controllers/Student/ExamSessionController.php:130
+ * @see app/Http/Controllers/Student/ExamSessionController.php:142
  * @route '/student/exam-sessions/{examParticipation}/finish'
  */
         finishForm.post = (args: { examParticipation: string | { id: string } } | [examParticipation: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({

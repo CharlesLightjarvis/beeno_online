@@ -16,6 +16,7 @@ export type ExamSessionStudentProgress = {
     status: ExamParticipationStatus;
     joined_at: string | null;
     progress?: {
+        module: string;
         part_number: number;
         answered_task_positions: number[];
         total_tasks: number;
@@ -31,6 +32,7 @@ export type ExamSessionDetail = {
     status: ExamSessionStatus;
     opened_at: string | null;
     started_at?: string | null;
+    active_module?: string | null;
     closed_at: string | null;
     displayed_material_id?: string | null;
     participations: ExamSessionStudentProgress[];
@@ -51,13 +53,16 @@ export type ExamSessionReadingMaterial = {
 
 export type TeacherExamPart = {
     id: string;
+    module: string;
+    module_position: number;
     part_number: number;
     instructions: string | null;
-    reading_materials: { id: string; position: number; body: string }[];
+    reading_materials: { id: string; position: number; body: string; media_type: string; media_url: string | null }[];
     tasks: {
         id: string;
         position: number;
         prompt: string | null;
+        response_type: 'choice' | 'text';
         choices: { label: string; body: string | null }[];
     }[];
 };
@@ -72,16 +77,19 @@ export type StudentExamParticipationSummary = {
     status: ExamParticipationStatus;
     joined_at: string | null;
 };
-export type StudentExamChoice = { id: string; label: string };
+export type StudentExamChoice = { id: string; label: string; body?: string | null };
 export type StudentExamTask = {
     id: string;
     position: number;
     prompt: string | null;
+    response_type: 'choice' | 'text';
+    material?: { media_type: string; media_url: string | null; body: string | null } | null;
     choices: StudentExamChoice[];
 };
 export type StudentExamPart = {
     id: string;
     part_number: number;
+    module: 'lesen' | 'hoeren' | 'schreiben' | 'sprechen' | string;
     instructions: string | null;
     tasks: StudentExamTask[];
 };

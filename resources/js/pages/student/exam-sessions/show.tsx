@@ -4,6 +4,7 @@ import { Circle, CircleCheck, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ConfirmActionDialog } from '@/components/confirm-action-dialog';
 import { ExamSessionPresenceJoiner } from '@/components/exam-session-presence';
+import MarkdownContent from '@/components/markdown-content';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -22,9 +23,7 @@ export default function StudentExamSessionShow({
     exam: StudentExamDelivery;
     responses: Record<string, string>;
 }) {
-    const [partNumber, setPartNumber] = useState(
-        exam.parts[0]?.part_number ?? 1,
-    );
+    const [partKey, setPartKey] = useState(exam.parts[0]?.id ?? 'empty');
     const [taskPosition, setTaskPosition] = useState(1);
     const [answers, setAnswers] = useState(responses);
     const [saveState, setSaveState] = useState<SaveState>('idle');
@@ -45,10 +44,11 @@ export default function StudentExamSessionShow({
         participation.status !== 'completed';
     const previousConnectionStatus = useRef(connectionStatus);
     const activePart =
-        exam.parts.find((part) => part.part_number === partNumber) ??
+        exam.parts.find((part) => part.id === partKey) ??
         exam.parts[0] ?? {
             id: 'empty',
-            part_number: partNumber,
+            module: 'lesen',
+            part_number: 1,
             instructions: null,
             tasks: [],
         };
@@ -58,6 +58,7 @@ export default function StudentExamSessionShow({
             id: 'empty',
             position: 1,
             prompt: null,
+            response_type: 'choice',
             choices: [],
         };
     const isLocked =
@@ -111,7 +112,7 @@ export default function StudentExamSessionShow({
                 pendingAnswersRef.current.clear();
 
                 const failedAnswers = await Promise.all(
-                    batch.map(async ([taskId, choiceId]) => {
+                    batch.map(async ([taskId, answer]) => {
                         try {
                             const xsrfCookie = document.cookie
                                 .split('; ')
@@ -139,7 +140,12 @@ export default function StudentExamSessionShow({
                                     signal: AbortSignal.timeout(10_000),
                                     body: JSON.stringify({
                                         task_id: taskId,
-                                        choice_id: choiceId,
+                                        ...(exam.parts
+                                            .flatMap((part) => part.tasks)
+                                            .find((task) => task.id === taskId)
+                                            ?.response_type === 'text'
+                                            ? { answer_text: answer }
+                                            : { choice_id: answer }),
                                     }),
                                 },
                             );
@@ -150,22 +156,22 @@ export default function StudentExamSessionShow({
                                 !response.ok ||
                                 !contentType.includes('application/json')
                             ) {
-                                return [taskId, choiceId] as const;
+                                return [taskId, answer] as const;
                             }
 
                             return null;
                         } catch {
-                            return [taskId, choiceId] as const;
+                            return [taskId, answer] as const;
                         }
                     }),
                 );
 
                 failedAnswers.forEach((entry) => {
                     if (entry) {
-                        const [taskId, choiceId] = entry;
+                        const [taskId, answer] = entry;
 
                         if (!pendingAnswersRef.current.has(taskId)) {
-                            pendingAnswersRef.current.set(taskId, choiceId);
+                            pendingAnswersRef.current.set(taskId, answer);
                         }
 
                         failed = true;
@@ -191,7 +197,7 @@ export default function StudentExamSessionShow({
         }
 
         return !failed && pendingAnswersRef.current.size === 0;
-    }, [isLocked, participation.id]);
+    }, [exam.parts, isLocked, participation.id]);
 
     const scheduleAnswerSave = () => {
         if (saveTimerRef.current !== null) {
@@ -317,8 +323,20 @@ export default function StudentExamSessionShow({
         scheduleAnswerSave();
     };
 
-    const changePart = (nextPart: number) => {
-        setPartNumber(nextPart);
+    const selectText = (answer: string) => {
+        if (isLocked) {
+            return;
+        }
+
+        answersRef.current = { ...answersRef.current, [activeTask.id]: answer };
+        setAnswers(answersRef.current);
+        pendingAnswersRef.current.set(activeTask.id, answer);
+        setSaveState('saving');
+        scheduleAnswerSave();
+    };
+
+    const changePart = (nextPartId: string) => {
+        setPartKey(nextPartId);
         setTaskPosition(1);
     };
 
@@ -350,7 +368,7 @@ export default function StudentExamSessionShow({
                             {exam.title}
                         </h1>
                         <p className="text-sm text-muted-foreground">
-                            TELC Deutsch A1 · Lesen
+                            TELC · {activePart.module}
                         </p>
                     </div>
                     <div className="flex items-center gap-3">
@@ -418,17 +436,17 @@ export default function StudentExamSessionShow({
                             key={part.id}
                             type="button"
                             variant={
-                                part.part_number === activePart.part_number
+                                part.id === activePart.id
                                     ? 'default'
                                     : 'outline'
                             }
                             role="tab"
                             aria-selected={
-                                part.part_number === activePart.part_number
+                                part.id === activePart.id
                             }
-                            onClick={() => changePart(part.part_number)}
+                            onClick={() => changePart(part.id)}
                         >
-                            Teil {part.part_number}
+                            {part.module} · Teil {part.part_number}
                         </Button>
                     ))}
                     <span className="ml-auto text-sm text-muted-foreground">
@@ -441,7 +459,7 @@ export default function StudentExamSessionShow({
                         <h2 className="text-xl font-semibold">
                             Teil {activePart.part_number}
                         </h2>
-                        {activePart.instructions && (
+                        {activePart.instructions && activePart.module !== 'hoeren' && (
                             <p className="mt-1 text-muted-foreground">
                                 {activePart.instructions}
                             </p>
@@ -488,9 +506,8 @@ export default function StudentExamSessionShow({
                     <div className="space-y-5 rounded-md border p-4 sm:p-6">
                         <div className="flex flex-wrap items-center justify-between gap-2">
                             <h3 className="text-lg font-semibold">
-                                Question{' '}
-                                {(activePart.part_number - 1) * 5 +
-                                    activeTask.position}
+                                {activePart.module} · Teil {activePart.part_number} · Question{' '}
+                                {activeTask.position}
                             </h3>
                             <span
                                 aria-live="polite"
@@ -505,11 +522,33 @@ export default function StudentExamSessionShow({
                                         : ''}
                             </span>
                         </div>
-                        <p className="text-base leading-7">
-                            {activeTask.prompt}
-                        </p>
+                        {activePart.module !== 'schreiben' && (
+                            <p className="text-base leading-7">{activeTask.prompt}</p>
+                        )}
 
-                        {activePart.part_number === 2 ? (
+                        {activeTask.response_type === 'text' ? (
+                            <textarea
+                                aria-label="Réponse écrite"
+                                value={answers[activeTask.id] ?? ''}
+                                disabled={isLocked}
+                                onChange={(event) => selectText(event.target.value)}
+                                rows={8}
+                                className="w-full rounded-md border bg-background p-3 leading-7"
+                                placeholder="Écrivez votre réponse ici…"
+                            />
+                        ) : activePart.module === 'hoeren' ? (
+                            <fieldset className="space-y-3">
+                                <legend className="text-sm font-medium">Choisissez une réponse</legend>
+                                <div className="flex flex-col gap-3">
+                                    {activeTask.choices.map((choice) => (
+                                        <label key={choice.id} className={`flex cursor-pointer items-start gap-3 rounded-md border px-4 py-3 text-sm ${answers[activeTask.id] === choice.id ? 'border-primary bg-accent' : ''} ${isLocked ? 'cursor-not-allowed opacity-70' : ''}`}>
+                                            <input type="radio" name={`answer-${activeTask.id}`} value={choice.id} checked={answers[activeTask.id] === choice.id} disabled={isLocked} onChange={() => selectChoice(choice.id)} className="mt-1 size-4 accent-primary" />
+                                            <span><span className="font-semibold">{choice.label}</span>{choice.body && <span className="ml-2">{choice.body}</span>}</span>
+                                        </label>
+                                    ))}
+                                </div>
+                            </fieldset>
+                        ) : activePart.module === 'lesen' && activePart.part_number === 2 ? (
                             <fieldset className="space-y-3">
                                 <legend className="text-sm font-medium">
                                     Choisissez une annonce
@@ -565,6 +604,7 @@ export default function StudentExamSessionShow({
                                                 }
                                                 className="size-4 accent-primary"
                                             />
+                                            {choice.body && <span className="ml-2 text-left font-normal">{choice.body}</span>}
                                             <span>
                                                 {choice.label === 'richtig'
                                                     ? 'Richtig (+)'

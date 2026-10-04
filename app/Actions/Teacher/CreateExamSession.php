@@ -47,6 +47,7 @@ class CreateExamSession
                         'access_code' => Str::upper(Str::random(8)),
                         'status' => ExamSessionStatus::Open,
                         'opened_at' => now(),
+                        'active_module' => 'lesen',
                     ]);
 
                     $this->snapshotExam($exam, $session);
@@ -78,29 +79,31 @@ class CreateExamSession
         $exam->loadMissing('parts.readingMaterials', 'parts.tasks.choices');
         $parts = $exam->parts;
 
-        if ($parts->pluck('part_number')->all() !== [1, 2, 3]
-            || $parts->contains(fn ($part): bool => $part->tasks->count() !== 5)) {
+        $modules = $parts->pluck('module')->unique()->values()->all();
+        if (collect(['lesen', 'hoeren', 'schreiben'])->diff($modules)->isNotEmpty()
+            || $parts->contains(fn ($part): bool => $part->tasks->isEmpty())) {
             throw ValidationException::withMessages([
-                'exam_id' => 'Cet examen ne contient pas les trois parties complètes.',
+                'exam_id' => 'Cet examen ne contient pas de modules complets.',
             ]);
         }
 
         foreach ($parts as $part) {
-            $expectedLabels = $part->part_number === 2 ? ['A', 'B'] : ['richtig', 'falsch'];
-
-            if ($part->part_number !== 2 && $part->readingMaterials->isEmpty()) {
+            if ($part->module === 'hoeren' && $part->readingMaterials->isEmpty()) {
                 throw ValidationException::withMessages(['exam_id' => 'Un passage de lecture est manquant.']);
             }
 
             foreach ($part->tasks as $task) {
-                if ($task->choices->pluck('label')->all() !== $expectedLabels
+                if ($task->response_type === 'text') {
+                    continue;
+                }
+                if ($task->choices->count() < 2
                     || $task->choices->where('is_correct', true)->count() !== 1) {
                     throw ValidationException::withMessages([
-                        'exam_id' => 'Chaque question doit avoir ses choix et une seule bonne réponse.',
+                        'exam_id' => 'Chaque question à choix doit avoir au moins deux choix et une seule bonne réponse.',
                     ]);
                 }
 
-                if ($part->part_number !== 2 && ! $part->readingMaterials->contains('id', $task->reading_material_id)) {
+                if ($part->module === 'hoeren' && ! $part->readingMaterials->contains('id', $task->reading_material_id)) {
                     throw ValidationException::withMessages(['exam_id' => 'Une question est sans passage associé.']);
                 }
             }
@@ -109,9 +112,14 @@ class CreateExamSession
 
     private function snapshotExam(Exam $exam, ExamSession $session): void
     {
-        foreach ($exam->parts as $part) {
+        $moduleOrder = array_flip($exam->orderedModules());
+        $parts = $exam->parts->sortBy(fn ($part): int => (($moduleOrder[$part->module] ?? 999) * 1000) + (int) $part->part_number);
+
+        foreach ($parts as $part) {
             $snapshotPart = $session->parts()->create([
                 'source_part_id' => $part->id,
+                'module' => $part->module,
+                'module_position' => $moduleOrder[$part->module] ?? 999,
                 'part_number' => $part->part_number,
                 'instructions' => $part->instructions,
             ]);
@@ -123,6 +131,8 @@ class CreateExamSession
                     'source' => $material->source,
                     'title' => $material->title,
                     'body' => $material->body,
+                    'media_type' => $material->media_type,
+                    'media_url' => $material->media_url,
                     'position' => $material->position,
                 ]);
                 $materialMap[$material->id] = $snapshotMaterial;
@@ -135,6 +145,7 @@ class CreateExamSession
                     'reading_material_id' => $snapshotMaterial?->id,
                     'source_task_id' => $task->id,
                     'prompt' => $task->prompt,
+                    'response_type' => $task->response_type,
                     'position' => $task->position,
                 ]);
 

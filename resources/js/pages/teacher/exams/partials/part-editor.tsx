@@ -12,13 +12,18 @@ export default function PartEditor({ part, partIndex, errors, onChange }: { part
     const error = (path: string) => errors[`parts.${partIndex}.${path}`];
     const labels = part.part_number === 2 ? 'Annonces A / B' : 'richtig (+) / falsch (−)';
     const setTask = (index: number, task: ExamTask) => onChange({ ...part, tasks: part.tasks.map((item, i) => i === index ? task : item) });
+    const displayLabels = part.module === 'hoeren'
+        ? (part.part_number === 2 ? 'richtig / falsch' : 'a / b / c')
+        : labels;
     const renumber = (tasks: ExamTask[]) => tasks.map((task, index) => ({ ...task, position: index + 1 }));
     const addTask = () => {
         if (part.tasks.length >= 5) {
             return;
         }
 
-        const labelsForTask = part.part_number === 2 ? ['A', 'B'] : ['richtig', 'falsch'];
+        const labelsForTask = part.module === 'hoeren'
+            ? (part.part_number === 2 ? ['richtig', 'falsch'] : ['a', 'b', 'c'])
+            : (part.part_number === 2 ? ['A', 'B'] : ['richtig', 'falsch']);
         const choices = labelsForTask.map((label, index) => ({ label, body: null, is_correct: index === 0, position: index + 1 }));
         onChange({ ...part, tasks: renumber([...part.tasks, { reading_material_id: null, prompt: '', position: part.tasks.length + 1, choices }]) });
     };
@@ -66,12 +71,31 @@ export default function PartEditor({ part, partIndex, errors, onChange }: { part
         }
 
         const material = part.reading_materials[materialIndex];
-        const choices = ['richtig', 'falsch'].map((label, index) => ({ label, body: null, is_correct: index === 0, position: index + 1 }));
+        const labelsForTask = part.module === 'hoeren' && part.part_number !== 2 ? ['a', 'b', 'c'] : ['richtig', 'falsch'];
+        const choices = labelsForTask.map((label, index) => ({ label, body: null, is_correct: index === 0, position: index + 1 }));
         onChange({
             ...part,
             tasks: renumber([...part.tasks, { reading_material_id: material.id ?? null, reading_material_position: material.position, prompt: '', position: part.tasks.length + 1, choices }]),
         });
     };
+
+    if (part.module === 'hoeren') {
+        const audio = part.reading_materials[0] ?? { source: 'Audio', title: null, body: '', media_type: 'audio' as const, media_url: '', position: 1 };
+        const updateAudio = (media_url: string) => onChange({ ...part, reading_materials: [{ ...audio, source: 'Audio', media_type: 'audio', media_url, position: 1 }] });
+
+        return <div className="space-y-6">
+            {part.part_number === 1 && <div className="rounded-lg border bg-muted/30 p-4"><h2 className="font-semibold">Hören · Audio commun</h2><p className="mt-1 text-sm text-muted-foreground">Ce même audio sera utilisé pour les trois Teile.</p><div className="mt-3 space-y-2"><Label htmlFor="hoeren-audio-url">Lien du fichier audio</Label><Input id="hoeren-audio-url" type="url" value={audio.media_url ?? ''} onChange={(event) => updateAudio(event.target.value)} placeholder="https://.../audio.mp3" /><InputError message={error('reading_materials.0.media_url')} /></div></div>}
+            <div className="rounded-lg border bg-muted/30 p-4"><h2 className="font-semibold">Hören · Teil {part.part_number}</h2><p className="mt-1 text-sm text-muted-foreground">{part.part_number === 2 ? 'Cochez richtig ou falsch.' : 'Saisissez les textes des réponses a, b et c.'}</p></div>
+            {part.tasks.map((task, index) => <TaskEditor key={task.id ?? task.position} module="hoeren" partNumber={part.part_number} partIndex={partIndex} taskIndex={index} errors={errors} materialOptions={[]} task={task} onChange={(next) => setTask(index, next)} onRemove={() => onChange({ ...part, tasks: renumber(part.tasks.filter((_, i) => i !== index)) })} />)}
+            <Button type="button" variant="outline" disabled={part.tasks.length >= 5} onClick={addTask}><Plus className="mr-2 size-4" />Ajouter une question ({part.tasks.length}/5)</Button>
+        </div>;
+    }
+
+    if (part.module === 'schreiben') {
+        const writingTask = part.tasks[0] ?? { id: undefined, reading_material_id: null, prompt: '', response_type: 'text' as const, position: 1, choices: [] };
+
+        return <div className="space-y-6"><div className="rounded-lg border bg-muted/30 p-4"><h2 className="font-semibold">Schreiben · Sujet</h2><p className="mt-1 text-sm text-muted-foreground">Tout le sujet est saisi en Markdown et affiché tel quel à l’étudiant.</p></div><div className="space-y-2"><Label>Sujet Schreiben</Label><MdxContentEditor id="schreiben-prompt" markdown={writingTask.prompt} onChange={(prompt) => onChange({ ...part, instructions: '', tasks: [{ ...writingTask, prompt, response_type: 'text', position: 1, choices: [] }] })} /><InputError message={error('tasks.0.prompt')} /></div></div>;
+    }
 
     if (part.part_number !== 2) {
         return <div className="space-y-6">
@@ -94,7 +118,7 @@ export default function PartEditor({ part, partIndex, errors, onChange }: { part
                     <div className="space-y-2"><Label>Contenu du texte</Label><MdxContentEditor id={`part-${part.part_number}-material-${material.id ?? material.position}`} markdown={material.body ?? ''} onChange={(body) => onChange({ ...part, reading_materials: part.reading_materials.map((item, index) => index === materialIndex ? { ...item, body } : item) })} /><InputError message={error(`reading_materials.${materialIndex}.body`)} /></div>
                     <div className="space-y-3 border-t pt-4">
                         <div className="flex items-center justify-between"><h4 className="text-sm font-semibold">Questions sur ce texte ({associatedTasks.length})</h4><Button type="button" variant="outline" size="sm" disabled={part.tasks.length >= 5} onClick={() => addQuestionToMaterial(materialIndex)}><Plus className="mr-2 size-4" />Ajouter une question</Button></div>
-                        {associatedTasks.map(({ task, taskIndex }) => <TaskEditor key={task.id ?? task.position} partNumber={part.part_number} partIndex={partIndex} taskIndex={taskIndex} errors={errors} materialOptions={[]} task={task} onChange={(next) => setTask(taskIndex, next)} onRemove={() => onChange({ ...part, tasks: renumber(part.tasks.filter((_, index) => index !== taskIndex)) })} />)}
+                        {associatedTasks.map(({ task, taskIndex }) => <TaskEditor key={task.id ?? task.position} module={part.module} partNumber={part.part_number} partIndex={partIndex} taskIndex={taskIndex} errors={errors} materialOptions={[]} task={task} onChange={(next) => setTask(taskIndex, next)} onRemove={() => onChange({ ...part, tasks: renumber(part.tasks.filter((_, index) => index !== taskIndex)) })} />)}
                     </div>
                 </section>;
             })}
@@ -105,10 +129,10 @@ export default function PartEditor({ part, partIndex, errors, onChange }: { part
 
     return <div className="space-y-6">
         <InputError message={error('instructions')} />
-        <div className="rounded-lg border bg-muted/30 p-4"><h2 className="font-semibold">Teil {part.part_number} · {labels}</h2><p className="mt-1 text-sm text-muted-foreground">{part.part_number === 2 ? 'Une consigne et deux annonces présentées côte à côte pour chaque question.' : 'Ajoutez les textes communs, puis reliez chaque affirmation au bon texte.'}</p><div className="mt-3 space-y-2"><Label htmlFor={`instructions-${part.part_number}`}>Consignes</Label><Textarea id={`instructions-${part.part_number}`} value={part.instructions} onChange={(event) => onChange({ ...part, instructions: event.target.value })} rows={2} /></div></div>
+        <div className="rounded-lg border bg-muted/30 p-4"><h2 className="font-semibold">Teil {part.part_number} · {displayLabels}</h2><p className="mt-1 text-sm text-muted-foreground">{part.part_number === 2 ? 'Une consigne et deux annonces présentées côte à côte pour chaque question.' : 'Ajoutez les textes communs, puis reliez chaque affirmation au bon texte.'}</p><div className="mt-3 space-y-2"><Label htmlFor={`instructions-${part.part_number}`}>Consignes</Label><Textarea id={`instructions-${part.part_number}`} value={part.instructions} onChange={(event) => onChange({ ...part, instructions: event.target.value })} rows={2} /></div></div>
         {part.reading_materials.map((material, index) => <section key={material.id ?? material.position} className="space-y-3 rounded-lg border p-4"><div className="flex items-center justify-between"><h3 className="font-semibold">Texte {index + 1}</h3><Button type="button" variant="ghost" size="sm" onClick={() => removeMaterial(index)}><Trash2 className="mr-2 size-4" />Supprimer</Button></div><div className="space-y-2"><Label htmlFor={`material-source-${part.part_number}-${index}`}>Type de document / source</Label><Input id={`material-source-${part.part_number}-${index}`} value={material.source} onChange={(event) => onChange({ ...part, reading_materials: part.reading_materials.map((item, i) => i === index ? { ...item, source: event.target.value } : item) })} placeholder="E-Mail von Karin an Li" /></div><div className="space-y-2"><Label htmlFor={`material-title-${part.part_number}-${index}`}>Titre (facultatif)</Label><Input id={`material-title-${part.part_number}-${index}`} value={material.title ?? ''} onChange={(event) => onChange({ ...part, reading_materials: part.reading_materials.map((item, i) => i === index ? { ...item, title: event.target.value } : item) })} placeholder="Hallo Li," /></div><div className="space-y-2"><Label htmlFor={`material-body-${part.part_number}-${index}`}>Texte affiché à l’étudiant</Label><Textarea id={`material-body-${part.part_number}-${index}`} rows={7} value={material.body} onChange={(event) => onChange({ ...part, reading_materials: part.reading_materials.map((item, i) => i === index ? { ...item, body: event.target.value } : item) })} /></div></section>)}
         {part.part_number !== 2 && <Button type="button" variant="outline" onClick={addMaterial}><Plus className="mr-2 size-4" />Ajouter un texte</Button>}
-        {part.tasks.map((task, index) => <TaskEditor key={task.id ?? task.position} partNumber={part.part_number} partIndex={partIndex} taskIndex={index} errors={errors} materialOptions={part.reading_materials} task={task} onChange={(next) => setTask(index, next)} onRemove={() => onChange({ ...part, tasks: renumber(part.tasks.filter((_, i) => i !== index)) })} />)}
+        {part.tasks.map((task, index) => <TaskEditor key={task.id ?? task.position} module={part.module} partNumber={part.part_number} partIndex={partIndex} taskIndex={index} errors={errors} materialOptions={part.reading_materials} task={task} onChange={(next) => setTask(index, next)} onRemove={() => onChange({ ...part, tasks: renumber(part.tasks.filter((_, i) => i !== index)) })} />)}
         <Button type="button" variant="outline" disabled={part.tasks.length >= 5} onClick={addTask}><Plus className="mr-2 size-4" />Ajouter une question ({part.tasks.length}/5)</Button>
     </div>;
 }

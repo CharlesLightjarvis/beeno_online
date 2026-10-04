@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /** @property ExamSessionStatus $status */
-#[Fillable(['exam_id', 'teacher_id', 'title', 'access_code', 'status', 'displayed_material_id', 'opened_at', 'started_at', 'closed_at'])]
+#[Fillable(['exam_id', 'teacher_id', 'title', 'access_code', 'status', 'displayed_material_id', 'opened_at', 'started_at', 'active_module', 'closed_at'])]
 class ExamSession extends Model
 {
     /** @use HasFactory<ExamSessionFactory> */
@@ -33,7 +33,9 @@ class ExamSession extends Model
     /** @return HasMany<ExamSessionPart, $this> */
     public function parts(): HasMany
     {
-        return $this->hasMany(ExamSessionPart::class)->orderBy('part_number');
+        return $this->hasMany(ExamSessionPart::class)
+            ->orderBy('module_position')
+            ->orderBy('part_number');
     }
 
     /** @return HasMany<ExamParticipation, $this> */

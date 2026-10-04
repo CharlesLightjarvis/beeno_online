@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
             CourseLevelSeeder::class,
             UsersSeeder::class,
             TelcA1LesenSeeder::class,
+            TelcA1HorenSchreibenSeeder::class,
         ]);
     }
 }

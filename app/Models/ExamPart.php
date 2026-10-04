@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['exam_id', 'part_number', 'instructions'])]
+#[Fillable(['exam_id', 'module', 'module_position', 'part_number', 'instructions'])]
 class ExamPart extends Model
 {
     /** @use HasFactory<ExamPartFactory> */

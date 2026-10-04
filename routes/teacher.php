@@ -20,6 +20,7 @@ Route::middleware(['auth', 'verified', 'role:teacher'])
         Route::resource('exam-sessions', ExamSessionController::class)->only(['index', 'create', 'store', 'show']);
         Route::get('exam-sessions/{examSession}/run', [ExamSessionController::class, 'run'])->name('exam-sessions.run');
         Route::post('exam-sessions/{examSession}/start', [ExamSessionController::class, 'start'])->name('exam-sessions.start');
+        Route::post('exam-sessions/{examSession}/advance', [ExamSessionController::class, 'advance'])->name('exam-sessions.advance');
         Route::post('exam-sessions/{examSession}/open', [ExamSessionController::class, 'open'])->name('exam-sessions.open');
         Route::post('exam-sessions/{examSession}/close', [ExamSessionController::class, 'close'])->name('exam-sessions.close');
         Route::post('exam-sessions/{examSession}/reading-material', [ExamSessionController::class, 'setDisplayMaterial'])->name('exam-sessions.reading-material');

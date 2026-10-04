@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /** @property ExamStatus $status */
-#[Fillable(['teacher_id', 'title', 'level', 'status'])]
+#[Fillable(['teacher_id', 'title', 'level', 'status', 'module_order'])]
 class Exam extends Model
 {
     /** @use HasFactory<ExamFactory> */
@@ -28,7 +28,9 @@ class Exam extends Model
     /** @return HasMany<ExamPart, $this> */
     public function parts(): HasMany
     {
-        return $this->hasMany(ExamPart::class)->orderBy('part_number');
+        return $this->hasMany(ExamPart::class)
+            ->orderBy('module_position')
+            ->orderBy('part_number');
     }
 
     /** @return HasMany<ExamSession, $this> */
@@ -39,6 +41,23 @@ class Exam extends Model
 
     protected function casts(): array
     {
-        return ['status' => ExamStatus::class];
+        return ['status' => ExamStatus::class, 'module_order' => 'array'];
+    }
+
+    /** @return array<int, string> */
+    public function orderedModules(): array
+    {
+        $configured = is_array($this->module_order) ? $this->module_order : [];
+        $default = ['lesen', 'hoeren', 'schreiben', 'sprechen'];
+        $present = $this->relationLoaded('parts')
+            ? $this->parts->pluck('module')->unique()->values()->all()
+            : [];
+
+        return collect([...$configured, ...$default, ...$present])
+            ->filter(fn (mixed $module): bool => is_string($module) && in_array($module, $default, true))
+            ->unique()
+            ->filter(fn (string $module): bool => $present === [] || in_array($module, $present, true))
+            ->values()
+            ->all();
     }
 }

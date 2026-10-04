@@ -11,6 +11,6 @@ class ExamReadingMaterialFactory extends Factory
 {
     public function definition(): array
     {
-        return ['part_id' => ExamPart::factory(), 'source' => fake()->domainName(), 'title' => fake()->sentence(3), 'body' => fake()->paragraph(), 'position' => 1];
+        return ['part_id' => ExamPart::factory(), 'source' => fake()->domainName(), 'title' => fake()->sentence(3), 'body' => fake()->paragraph(), 'media_type' => 'text', 'media_url' => null, 'position' => 1];
     }
 }

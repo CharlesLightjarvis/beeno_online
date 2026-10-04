@@ -19,22 +19,34 @@ class SaveExam
             if ($exam !== null) {
                 $this->assertChildOwnership($exam, $data['parts'] ?? []);
                 $exam->parts()->delete();
-                $exam->update(['title' => $data['title'], 'status' => $data['status']]);
+                $exam->update([
+                    'title' => $data['title'],
+                    'level' => $data['level'] ?? $exam->level,
+                    'status' => $data['status'],
+                    'module_order' => $data['module_order'] ?? $exam->module_order,
+                ]);
             } else {
                 $exam = $teacher->exams()->create([
                     'title' => $data['title'],
-                    'level' => 'A1',
+                    'level' => $data['level'] ?? 'A1',
                     'status' => $data['status'],
+                    'module_order' => $data['module_order'] ?? ['lesen', 'hoeren', 'schreiben', 'sprechen'],
                 ]);
             }
 
+            $moduleOrder = array_flip($data['module_order'] ?? ['lesen', 'hoeren', 'schreiben', 'sprechen']);
             foreach ($data['parts'] ?? [] as $partData) {
-                $part = $exam->parts()->create(Arr::only($partData, ['part_number', 'instructions']));
+                $module = $partData['module'] ?? 'lesen';
+                $part = $exam->parts()->create([
+                    ...Arr::only($partData, ['module', 'module_position', 'part_number', 'instructions']),
+                    'module' => $module,
+                    'module_position' => $moduleOrder[$module] ?? 999,
+                ]);
                 $materials = [];
                 $materialsByPosition = [];
                 $firstMaterial = null;
                 foreach ($partData['reading_materials'] ?? [] as $materialData) {
-                    $material = $part->readingMaterials()->create(Arr::only($materialData, ['source', 'title', 'body', 'position']));
+                    $material = $part->readingMaterials()->create(Arr::only($materialData, ['source', 'title', 'body', 'media_type', 'media_url', 'position']));
                     $firstMaterial ??= $material;
                     $materials[$material->id] = $material;
                     $materialsByPosition[$materialData['position']] = $material;
@@ -60,6 +72,7 @@ class SaveExam
                     $task = $part->tasks()->create([
                         'reading_material_id' => $materialId === null ? null : $materials[$materialId]->id,
                         'prompt' => $taskData['prompt'],
+                        'response_type' => $taskData['response_type'] ?? 'choice',
                         'position' => $taskData['position'],
                     ]);
                     foreach ($taskData['choices'] ?? [] as $choiceData) {

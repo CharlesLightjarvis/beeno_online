@@ -11,6 +11,6 @@ class ExamPartFactory extends Factory
 {
     public function definition(): array
     {
-        return ['exam_id' => Exam::factory(), 'part_number' => 1, 'instructions' => fake()->sentence()];
+        return ['exam_id' => Exam::factory(), 'module' => 'lesen', 'module_position' => 0, 'part_number' => 1, 'instructions' => fake()->sentence()];
     }
 }

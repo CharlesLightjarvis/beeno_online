@@ -11,6 +11,6 @@ class ExamTaskFactory extends Factory
 {
     public function definition(): array
     {
-        return ['part_id' => ExamPart::factory(), 'reading_material_id' => null, 'prompt' => fake()->sentence(), 'position' => 1];
+        return ['part_id' => ExamPart::factory(), 'reading_material_id' => null, 'prompt' => fake()->sentence(), 'response_type' => 'choice', 'position' => 1];
     }
 }

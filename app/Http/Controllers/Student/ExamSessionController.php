@@ -77,8 +77,12 @@ class ExamSessionController extends Controller
         $hasStarted = $session->started_at !== null;
 
         if ($hasStarted) {
-            $examParticipation->load('examSession.parts.readingMaterials', 'examSession.parts.tasks.choices', 'responses');
+            $examParticipation->load('examSession.parts.readingMaterials', 'examSession.parts.tasks.choices', 'examSession.parts.tasks.readingMaterial', 'responses');
         }
+
+        $visibleParts = $hasStarted && $session->active_module !== null
+            ? $session->parts->filter(fn (ExamSessionPart $part): bool => $part->module_position <= ($session->parts->firstWhere('module', $session->active_module)?->module_position ?? 0))->values()
+            : $session->parts;
 
         return Inertia::render('student/exam-sessions/show', [
             'participation' => [
@@ -92,23 +96,31 @@ class ExamSessionController extends Controller
             ],
             'exam' => [
                 'title' => $session->title,
-                'parts' => $hasStarted ? $session->parts->map(fn (ExamSessionPart $part): array => [
+                'parts' => $hasStarted ? $visibleParts->map(fn (ExamSessionPart $part): array => [
                     'id' => (string) $part->id,
+                    'module' => (string) $part->module,
                     'part_number' => (int) $part->part_number,
                     'instructions' => $part->instructions === null ? null : (string) $part->instructions,
                     'tasks' => $part->tasks->map(fn (ExamSessionTask $task): array => [
                         'id' => (string) $task->id,
                         'position' => (int) $task->position,
                         'prompt' => $task->prompt === null ? null : (string) $task->prompt,
+                        'response_type' => (string) $task->response_type,
+                        'material' => $task->readingMaterial ? [
+                            'media_type' => (string) $task->readingMaterial->media_type,
+                            'media_url' => $task->readingMaterial->media_url,
+                            'body' => $task->readingMaterial->body,
+                        ] : null,
                         'choices' => $task->choices->map(fn (ExamSessionChoice $choice): array => [
                             'id' => (string) $choice->id,
                             'label' => (string) $choice->label,
+                            'body' => $choice->body,
                         ])->all(),
                     ])->all(),
                 ]) : [],
             ],
             'responses' => $hasStarted ? $examParticipation->responses->mapWithKeys(
-                fn ($response): array => [$response->task_id => $response->choice_id],
+                fn ($response): array => [$response->task_id => $response->choice_id ?? $response->answer_text],
             ) : [],
         ]);
     }
@@ -116,7 +128,7 @@ class ExamSessionController extends Controller
     public function saveResponse(SaveExamResponseRequest $request, ExamParticipation $examParticipation, SaveExamResponse $save): JsonResponse|RedirectResponse
     {
         $data = $request->validated();
-        $save->handle($examParticipation, $data['task_id'], $data['choice_id']);
+        $save->handle($examParticipation, $data['task_id'], $data['choice_id'] ?? null, $data['answer_text'] ?? null);
         event(ExamSessionProgressUpdated::fromParticipation($examParticipation->fresh()));
         if ($request->expectsJson()) {
             return response()->json(['saved' => true]);
@@ -155,7 +167,9 @@ class ExamSessionController extends Controller
 
         $examParticipation->load('examSession.parts.tasks', 'responses');
         $positions = $examParticipation->examSession->parts
-            ->mapWithKeys(fn ($part) => [$part->part_number => $part->tasks->pluck('position')->all()]);
+            ->mapWithKeys(fn ($part) => [
+                $part->module.':'.$part->part_number => $part->tasks->pluck('position')->all(),
+            ]);
 
         return response()->json([
             'status' => $examParticipation->status->value,
@@ -165,7 +179,7 @@ class ExamSessionController extends Controller
             'answered_total' => $examParticipation->responses->count(),
             'tasks_by_part' => $positions,
             'responses' => $examParticipation->responses->mapWithKeys(
-                fn ($response): array => [$response->task_id => $response->choice_id],
+                fn ($response): array => [$response->task_id => $response->choice_id ?? $response->answer_text],
             ),
         ]);
     }

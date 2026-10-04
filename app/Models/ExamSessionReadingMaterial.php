@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['part_id', 'source_material_id', 'source', 'title', 'body', 'position'])]
+#[Fillable(['part_id', 'source_material_id', 'source', 'title', 'body', 'media_type', 'media_url', 'position'])]
 class ExamSessionReadingMaterial extends Model
 {
     /** @use HasFactory<ExamSessionReadingMaterialFactory> */
