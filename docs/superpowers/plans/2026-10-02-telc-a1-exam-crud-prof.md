@@ -50,7 +50,7 @@
 ## Interfaces entre tâches
 
 - `SaveExam::handle(User $teacher, array $data, ?Exam $exam = null): Exam` crée ou remplace de façon transactionnelle le contenu éditable de l’examen. Les IDs enfants soumis ne sont acceptés que s’ils appartiennent déjà à cet examen.
-- Format HTTP imbriqué : `parts[0..2]` avec `part_number`, `instructions`, `reading_materials[]` (`source`, `title`, `body`, `position`), `tasks[]` (`prompt`, `position`, `choices[]`), et les choix (`label`, `source`, `title`, `body`, `is_correct`). Les labels et nombres de choix sont déterminés par le numéro du Teil côté serveur.
+- Format HTTP imbriqué : `parts[0..2]` avec `part_number`, `instructions`, `reading_materials[]` (`source`, `title`, `body`, `position`), `tasks[]` (`reading_material_id`, `prompt`, `position`, `choices[]`), et les choix (`label`, `source`, `title`, `body`, `is_correct`). `reading_material_id` est un support partagé optionnel d’une tâche ; au Teil 2, les annonces A/B font partie du contenu de chaque choix.
 - Index retourne `exams` paginé avec `id`, `title`, `status`, `parts_count`, `tasks_count`, `updated_at`. Create/edit retourne `exam` sérialisé dans la même forme que `ExamFormData` TypeScript.
 
 ## Tasks
@@ -64,12 +64,12 @@
 - Test: `tests/Feature/Teacher/ExamManagementTest.php`
 
 **Interfaces:**
-- Produit les relations `Exam::parts()`, `ExamPart::readingMaterials()`, `ExamPart::tasks()`, `ExamTask::choices()` et les factories d’un examen complet.
+- Produit les relations `Exam::parts()`, `ExamPart::readingMaterials()`, `ExamPart::tasks()`, `ExamTask::readingMaterial()`, `ExamTask::choices()` et les factories d’un examen complet.
 
-- [ ] **Step 1: Écrire les tests de persistance et relations** — création d’un examen UUID avec trois Teile, supports liés, quinze tâches et choix ordonnés ; vérifier la contrainte unique sur le numéro du Teil et l’ordre au sein des parents.
-- [ ] **Step 2: Exécuter les tests ciblés et vérifier leur échec** — `php artisan test --compact tests/Feature/Teacher/ExamManagementTest.php` ; échec attendu avant schéma/modèles.
-- [ ] **Step 3: Ajouter migrations, modèles, enum et factories** — supprimer en cascade uniquement les enfants d’un examen ; conserver les foreign keys et contraintes uniques.
-- [ ] **Step 4: Relancer le test ciblé** — les relations et contraintes doivent passer.
+- [x] **Step 1: Écrire les tests de persistance et relations** — création d’un examen UUID avec trois Teile, supports liés, tâches qui référencent leur support partagé et choix ordonnés ; vérifier la contrainte unique sur le numéro du Teil et l’ordre au sein des parents.
+- [x] **Step 2: Exécuter les tests ciblés et vérifier leur échec** — `php artisan test --compact tests/Feature/Teacher/ExamManagementTest.php` ; échec attendu avant schéma/modèles.
+- [x] **Step 3: Ajouter migrations, modèles, enum et factories** — supprimer en cascade uniquement les enfants d’un examen ; conserver les foreign keys et contraintes uniques.
+- [x] **Step 4: Relancer le test ciblé** — les relations et contraintes doivent passer.
 
 ### Task 2: Autorisations, validation et CRUD serveur
 
@@ -82,11 +82,11 @@
 - Consomme les modèles de Task 1.
 - Produit les routes `teacher.exams.index/create/store/edit/update/destroy`, les props Inertia `teacher/exams/index|create|edit`, et la sauvegarde atomique `SaveExam::handle(...)`.
 
-- [ ] **Step 1: Écrire les tests HTTP** — teacher peut créer un brouillon, lire la liste paginée, modifier/supprimer le sien ; autre teacher ne peut ni lire ni changer l’examen ; étudiant/admin/non authentifié refusés selon middleware.
-- [ ] **Step 2: Écrire les tests de validation** — brouillon incomplet autorisé ; publication exige trois Teile et cinq tâches chacune ; Teil 1/3 impose vrai/faux, Teil 2 impose A/B, exactement un `is_correct` par tâche ; IDs d’enfants étrangers rejetés ; seules les données validées persistent.
-- [ ] **Step 3: Exécuter les tests ciblés et vérifier leur échec** — `php artisan test --compact tests/Feature/Teacher/ExamManagementTest.php`.
-- [ ] **Step 4: Implémenter permission, policy, Form Requests, action transactionnelle, contrôleur et routes resource** — index limité à `$request->user()->exams()` ; autoriser chaque enfant selon son examen parent ; publier un toast après succès ; supprimer un examen non référencé et ses enfants.
-- [ ] **Step 5: Relancer le test ciblé** — tous les scénarios HTTP, validation et propriété doivent passer.
+- [x] **Step 1: Écrire les tests HTTP** — teacher peut créer un brouillon, lire la liste paginée, modifier/supprimer le sien ; autre teacher ne peut ni lire ni changer l’examen ; étudiant/admin/non authentifié refusés selon middleware.
+- [x] **Step 2: Écrire les tests de validation** — brouillon incomplet autorisé ; publication exige trois Teile et cinq tâches chacune ; Teil 1/3 impose vrai/faux, Teil 2 impose A/B, exactement un `is_correct` par tâche ; IDs d’enfants étrangers rejetés ; seules les données validées persistent.
+- [x] **Step 3: Exécuter les tests ciblés et vérifier leur échec** — `php artisan test --compact tests/Feature/Teacher/ExamManagementTest.php`.
+- [x] **Step 4: Implémenter permission, policy, Form Requests, action transactionnelle, contrôleur et routes resource** — index limité à `$request->user()->exams()` ; autoriser chaque enfant selon son examen parent ; publier un toast après succès ; supprimer un examen et ses enfants.
+- [x] **Step 5: Relancer le test ciblé** — tous les scénarios HTTP, validation et propriété doivent passer.
 
 ### Task 3: Liste des examens et navigation professeur
 
@@ -99,9 +99,9 @@
 - Consomme la prop paginée `exams` du contrôleur.
 - Produit une liste DataTable avec colonnes titre, statut, nombre de tâches, dernière modification et actions modifier/supprimer.
 
-- [ ] **Step 1: Créer les types TypeScript** correspondant à l’index paginé et au statut `draft | published`.
-- [ ] **Step 2: Créer la page et la liste** — reprendre `teacher/sessions/index.tsx`, `SessionList` et les colonnes de sessions ; utiliser le DataTable, filtres, pagination, DropdownMenu, ConfirmActionDialog et toast existants.
-- [ ] **Step 3: Ajouter l’item Examens** dans la sidebar avec la permission `manage.own-exams` et générer les routes Wayfinder.
+- [x] **Step 1: Créer les types TypeScript** correspondant à l’index paginé et au statut `draft | published`.
+- [x] **Step 2: Créer la page et la liste** — reprendre `teacher/sessions/index.tsx`, `SessionList` et les colonnes de sessions ; utiliser le DataTable, filtres, pagination, DropdownMenu, ConfirmActionDialog et toast existants.
+- [x] **Step 3: Ajouter l’item Examens** dans la sidebar avec la permission `manage.own-exams` et générer les routes Wayfinder.
 - [ ] **Step 4: Vérifier les types et le rendu de navigation** — la table présente état vide, état rempli, actions et pagination sans erreurs TypeScript.
 
 ### Task 4: Formulaire de création/modification et aperçu A/B
@@ -114,11 +114,11 @@
 - Consomme `ExamFormData` et soumet les tableaux imbriqués définis plus haut aux routes store/update.
 - `ChoiceCardEditor` reçoit un choix A ou B et édite `source`, `title`, `body`; il affiche la prévisualisation en carte. Le contrôle de la clé sélectionne A ou B à part et n’est jamais inclus dans la prévisualisation destinée à l’étudiant.
 
-- [ ] **Step 1: Créer le formulaire partagé create/edit** avec titre, statut brouillon/publié, navigation entre Teil 1/2/3, consignes, supports et cinq tâches configurées par partie.
-- [ ] **Step 2: Construire l’éditeur de tâche** — Teil 1 et 3 ont deux choix fixes richtig/falsch ; Teil 2 a un prompt et deux choix fixes A/B.
-- [ ] **Step 3: Créer l’éditeur A/B visuel** — deux cartes encadrées avec label immuable, source en en-tête, titre facultatif et contenu multiligne ; aperçu côte à côte sur bureau, empilé sur mobile ; afficher les erreurs Laravel au niveau du champ correspondant.
-- [ ] **Step 4: Ajouter l’édition de la clé et les actions de liste dynamique** — un seul choix correct par tâche, ajouter/supprimer/réordonner les supports et tâches si le statut est brouillon ; désactiver la publication tant que les règles des 15 tâches ne sont pas satisfaites et montrer les erreurs de validation serveur.
-- [ ] **Step 5: Connecter les formulaires Inertia** avec les routes Wayfinder, valeurs initiales create/edit, états processing, toasts, boutons et breadcrumbs conformes aux pages professeur existantes.
+- [x] **Step 1: Créer le formulaire partagé create/edit** avec titre, statut brouillon/publié, navigation entre Teil 1/2/3, consignes, supports et cinq tâches configurées par partie.
+- [x] **Step 2: Construire l’éditeur de tâche** — Teil 1 et 3 ont un support partagé, un prompt et deux choix fixes richtig/falsch ; Teil 2 a un prompt et deux choix fixes A/B dont le contenu est édité dans les cartes.
+- [x] **Step 3: Créer l’éditeur A/B visuel** — deux cartes encadrées avec label immuable, source en en-tête, titre facultatif et contenu multiligne ; aperçu côte à côte sur bureau, empilé sur mobile ; erreurs Laravel visibles dans le formulaire.
+- [x] **Step 4: Ajouter l’édition de la clé et les actions de liste** — un seul choix correct par tâche ; conserver les cinq questions canoniques de chaque Teil et bloquer côté serveur une publication incomplète ; afficher les erreurs de validation.
+- [x] **Step 5: Connecter les formulaires Inertia** avec les routes Wayfinder, valeurs initiales create/edit, états processing, boutons et breadcrumbs conformes aux pages professeur existantes.
 - [ ] **Step 6: Vérifier les types et faire une revue responsive** sur largeur téléphone et bureau ; les cartes, contrôles, erreurs et actions doivent rester lisibles sans débordement.
 
 ### Task 5: Vérification intégrée du lot CRUD
@@ -127,7 +127,7 @@
 - Modify si requis : fichiers des Tasks 1–4
 - Test: `tests/Feature/Teacher/ExamManagementTest.php`
 
-- [ ] **Step 1: Compléter les parcours feature** — création via formulaire HTTP, réouverture edit avec les valeurs saisies, mise à jour imbriquée sans doublonner les enfants, suppression avec confirmation côté UI et suppression persistée côté serveur.
-- [ ] **Step 2: Relancer la suite feature CRUD** — `php artisan test --compact tests/Feature/Teacher/ExamManagementTest.php` doit passer.
+- [x] **Step 1: Compléter les parcours feature** — création via formulaire HTTP, réouverture edit avec les valeurs saisies, mise à jour imbriquée sans doublonner les enfants, suppression avec confirmation côté UI et suppression persistée côté serveur.
+- [x] **Step 2: Relancer la suite feature CRUD** — `php artisan test --compact tests/Feature/Teacher/ExamManagementTest.php` doit passer.
 - [ ] **Step 3: Vérifier les contrôles projet** — `npm run types:check`, `npm run lint:check`, `php artisan wayfinder:generate --with-form` puis vérifier que le diff généré est limité aux routes Exams.
 - [ ] **Step 4: Revue visuelle manuelle** — comparer liste/formulaires aux pages Sessions et Salaires ; contrôler les états vide/erreur/sauvegarde, le layout desktop/mobile, les cartes A/B et la confirmation de suppression.

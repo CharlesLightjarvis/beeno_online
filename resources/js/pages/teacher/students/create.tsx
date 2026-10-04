@@ -18,7 +18,7 @@ export default function StudentCreate() {
                         Ajouter un étudiant
                     </h1>
                     <p className="text-muted-foreground">
-                        Renseignez le nom complet de l'étudiant.
+                        Renseignez le nom complet et l'adresse e-mail de l'étudiant.
                     </p>
                 </div>
                 <Separator />
@@ -33,6 +33,14 @@ export default function StudentCreate() {
                                     <Label htmlFor="name">Nom complet *</Label>
                                     <Input id="name" name="name" autoFocus />
                                     <InputError message={errors.name} />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="email">Adresse e-mail *</Label>
+                                    <Input id="email" name="email" type="email" autoComplete="email" />
+                                    <InputError message={errors.email} />
+                                    <p className="text-sm text-muted-foreground">
+                                        Mot de passe par défaut du compte : Beeno + nom sans espaces (en minuscules) + 1@. Exemple : Yosri → Beenoyosri1@.
+                                    </p>
                                 </div>
                             </div>
                             <div className="flex justify-end gap-3">

@@ -426,7 +426,7 @@ update.patch = (args: { student: string | { id: string } } | [student: string | 
     update.form = updateForm
 /**
 * @see \App\Http\Controllers\Teacher\StudentController::destroy
- * @see app/Http/Controllers/Teacher/StudentController.php:63
+ * @see app/Http/Controllers/Teacher/StudentController.php:66
  * @route '/teacher/students/{student}'
  */
 export const destroy = (args: { student: string | { id: string } } | [student: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -441,7 +441,7 @@ destroy.definition = {
 
 /**
 * @see \App\Http\Controllers\Teacher\StudentController::destroy
- * @see app/Http/Controllers/Teacher/StudentController.php:63
+ * @see app/Http/Controllers/Teacher/StudentController.php:66
  * @route '/teacher/students/{student}'
  */
 destroy.url = (args: { student: string | { id: string } } | [student: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions) => {
@@ -474,7 +474,7 @@ destroy.url = (args: { student: string | { id: string } } | [student: string | {
 
 /**
 * @see \App\Http\Controllers\Teacher\StudentController::destroy
- * @see app/Http/Controllers/Teacher/StudentController.php:63
+ * @see app/Http/Controllers/Teacher/StudentController.php:66
  * @route '/teacher/students/{student}'
  */
 destroy.delete = (args: { student: string | { id: string } } | [student: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -484,7 +484,7 @@ destroy.delete = (args: { student: string | { id: string } } | [student: string 
 
     /**
 * @see \App\Http\Controllers\Teacher\StudentController::destroy
- * @see app/Http/Controllers/Teacher/StudentController.php:63
+ * @see app/Http/Controllers/Teacher/StudentController.php:66
  * @route '/teacher/students/{student}'
  */
     const destroyForm = (args: { student: string | { id: string } } | [student: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -499,7 +499,7 @@ destroy.delete = (args: { student: string | { id: string } } | [student: string 
 
             /**
 * @see \App\Http\Controllers\Teacher\StudentController::destroy
- * @see app/Http/Controllers/Teacher/StudentController.php:63
+ * @see app/Http/Controllers/Teacher/StudentController.php:66
  * @route '/teacher/students/{student}'
  */
         destroyForm.delete = (args: { student: string | { id: string } } | [student: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({

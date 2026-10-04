@@ -1,7 +1,9 @@
 import { Link, usePage } from '@inertiajs/react';
 import {
     CalendarRange,
+    ClipboardCheck,
     GraduationCap,
+    FileQuestion,
     LayoutGrid,
     Users,
     Wallet,
@@ -19,7 +21,11 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import adminRoutes from '@/routes/admin';
+import student from '@/routes/student';
+import studentExamSessions from '@/routes/student/exam-sessions';
 import teacher from '@/routes/teacher';
+import examSessions from '@/routes/teacher/exam-sessions';
+import exams from '@/routes/teacher/exams';
 import teacherSalaries from '@/routes/teacher/salaries';
 import sessions from '@/routes/teacher/sessions';
 import students from '@/routes/teacher/students';
@@ -28,9 +34,12 @@ import type { Auth, NavItem } from '@/types';
 export function AppSidebar() {
     const { auth } = usePage<{ auth: Auth }>().props;
 
+    const isStudent = auth.permissions.includes('view.own-exam-sessions');
     const dashboardHref = auth.permissions.includes('view.admin-dashboard')
         ? adminRoutes.dashboard()
-        : teacher.dashboard();
+        : isStudent
+          ? student.dashboard()
+          : teacher.dashboard();
 
     // Declarative: add a nav item here with an optional `permission` —
     // no extra branching needed anywhere else to show/hide it.
@@ -39,6 +48,13 @@ export function AppSidebar() {
             title: 'Dashboard',
             href: dashboardHref,
             icon: LayoutGrid,
+            permission: isStudent ? 'view.student-dashboard' : undefined,
+        },
+        {
+            title: 'Mes examens',
+            href: studentExamSessions.index(),
+            icon: FileQuestion,
+            permission: 'view.own-exam-sessions',
         },
         {
             title: 'Étudiants',
@@ -61,6 +77,18 @@ export function AppSidebar() {
             permission: auth.permissions.includes('view.admin-sessions')
                 ? 'view.admin-sessions'
                 : 'manage.own-sessions',
+        },
+        {
+            title: 'Examens',
+            href: exams.index(),
+            icon: FileQuestion,
+            permission: 'manage.own-exams',
+        },
+        {
+            title: 'Sessions d’examen',
+            href: examSessions.index(),
+            icon: ClipboardCheck,
+            permission: 'manage.own-exam-sessions',
         },
         {
             title: 'Salaires',

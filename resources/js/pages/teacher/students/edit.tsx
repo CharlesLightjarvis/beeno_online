@@ -39,6 +39,11 @@ export default function StudentEdit({ student }: { student: Student }) {
                                     />
                                     <InputError message={errors.name} />
                                 </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="email">Adresse e-mail *</Label>
+                                    <Input id="email" name="email" type="email" autoComplete="email" defaultValue={student.email ?? ''} />
+                                    <InputError message={errors.email} />
+                                </div>
                             </div>
                             <div className="flex justify-end gap-3">
                                 <Button

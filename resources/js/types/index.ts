@@ -8,3 +8,7 @@ export type * from './lesson';
 export type * from './admin-reporting';
 export type * from './payment-status';
 export type * from './salary';
+export type * from './exam';
+export type * from './exam-session';
+export type * from './exam-session';
+export type * from './exam-session';

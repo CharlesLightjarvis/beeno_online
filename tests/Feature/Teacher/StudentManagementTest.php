@@ -8,6 +8,7 @@ use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Hash;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
@@ -27,12 +28,12 @@ class StudentManagementTest extends TestCase
     {
         $teacher = $this->teacher();
 
-        $student = app(CreateStudent::class)->handle($teacher, '  Amina Ben Salah  ');
+        $student = app(CreateStudent::class)->handle($teacher, '  Amina Ben Salah  ', 'amina@example.test');
 
         $this->assertSame('Amina Ben Salah', $student->name);
         $this->assertSame($teacher->id, $student->teacher_id);
-        $this->assertNull($student->email);
-        $this->assertNull($student->password);
+        $this->assertSame('amina@example.test', $student->email);
+        $this->assertTrue(Hash::check('Beenoaminbensalah1@', $student->password));
         $this->assertTrue($student->hasExactRoles(RoleEnum::Student->value));
     }
 
@@ -59,21 +60,47 @@ class StudentManagementTest extends TestCase
 
         $this->actingAs($teacher)->post(route('teacher.students.store'), [
             'name' => 'Sami Trabelsi',
+            'email' => 'sami@example.test',
             'role' => 'admin',
         ])->assertRedirect(route('teacher.students.index'));
 
         $student = User::query()->where('name', 'Sami Trabelsi')->firstOrFail();
         $this->assertTrue($student->hasExactRoles(RoleEnum::Student->value));
         $this->assertSame($teacher->id, $student->teacher_id);
+        $this->assertSame('sami@example.test', $student->email);
+        $this->assertTrue(Hash::check('Beenosamitrabelsi1@', $student->password));
+    }
+
+    public function test_student_can_log_in_with_the_name_based_password_and_reach_their_dashboard(): void
+    {
+        $teacher = $this->teacher();
+
+        $this->actingAs($teacher)->post(route('teacher.students.store'), [
+            'name' => 'Yosri',
+            'email' => 'yosri@example.test',
+        ])->assertRedirect(route('teacher.students.index'));
+
+        auth()->logout();
+
+        $this->post(route('login.store'), [
+            'email' => 'yosri@example.test',
+            'password' => 'Beenoyosri1@',
+        ])->assertRedirect(route('student.dashboard'));
+
+        $this->get(route('student.dashboard'))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('student/dashboard')
+                ->where('summary.total', 0));
     }
 
     public function test_teacher_lists_only_their_active_students(): void
     {
         $teacher = $this->teacher();
         $otherTeacher = $this->teacher();
-        $visible = app(CreateStudent::class)->handle($teacher, 'Ali Mansour');
-        app(CreateStudent::class)->handle($otherTeacher, 'Leila Gharbi');
-        $archived = app(CreateStudent::class)->handle($teacher, 'Nour Ayari');
+        $visible = app(CreateStudent::class)->handle($teacher, 'Ali Mansour', 'ali@example.test');
+        app(CreateStudent::class)->handle($otherTeacher, 'Leila Gharbi', 'leila@example.test');
+        $archived = app(CreateStudent::class)->handle($teacher, 'Nour Ayari', 'nour@example.test');
         $archived->update(['archived_at' => now()]);
 
         $this->actingAs($teacher)
@@ -89,14 +116,16 @@ class StudentManagementTest extends TestCase
     public function test_teacher_can_update_and_archive_their_student(): void
     {
         $teacher = $this->teacher();
-        $student = app(CreateStudent::class)->handle($teacher, 'Ali Mansour');
+        $student = app(CreateStudent::class)->handle($teacher, 'Ali Mansour', 'ali@example.test');
 
         $this->actingAs($teacher)->patch(route('teacher.students.update', $student), [
             'name' => 'Aly Mansouri',
+            'email' => 'aly@example.test',
         ])->assertRedirect();
 
         $student->refresh();
         $this->assertSame('Aly Mansouri', $student->name);
+        $this->assertSame('aly@example.test', $student->email);
 
         $this->actingAs($teacher)
             ->delete(route('teacher.students.destroy', $student))
@@ -110,7 +139,7 @@ class StudentManagementTest extends TestCase
     {
         $owner = $this->teacher();
         $intruder = $this->teacher();
-        $student = app(CreateStudent::class)->handle($owner, 'Ines Jaziri');
+        $student = app(CreateStudent::class)->handle($owner, 'Ines Jaziri', 'ines@example.test');
 
         $this->actingAs($intruder)
             ->get(route('teacher.students.edit', $student))
@@ -131,11 +160,18 @@ class StudentManagementTest extends TestCase
 
         $this->actingAs($teacher)->post(route('teacher.students.store'), [
             'name' => '   ',
+            'email' => 'student@example.test',
         ])->assertSessionHasErrors(['name']);
 
         $this->actingAs($teacher)->post(route('teacher.students.store'), [
             'name' => str_repeat('a', 256),
+            'email' => 'student@example.test',
         ])->assertSessionHasErrors(['name']);
+
+        $this->actingAs($teacher)->post(route('teacher.students.store'), [
+            'name' => 'Nom valide',
+            'email' => 'pas-une-adresse',
+        ])->assertSessionHasErrors(['email']);
     }
 
     public function test_admin_student_and_guest_cannot_mutate_teacher_students(): void
