@@ -61,7 +61,7 @@ RUN composer install --no-dev --prefer-dist --optimize-autoloader --no-interacti
 COPY unit.json /docker-entrypoint.d/unit.json
 COPY supervisord.conf /etc/supervisor/conf.d/beenoonline.conf
 
-EXPOSE 80
+EXPOSE 80 8080
 
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
     CMD curl --fail http://127.0.0.1/up || exit 1
