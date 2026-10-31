@@ -561,6 +561,17 @@ export default function StudentExamSessionShow({
                                         : ''}
                             </span>
                         </div>
+                        {activePart.module === 'lesen' && activeTask.material?.body && (
+                            <article className="min-w-0 rounded-md border p-4 sm:p-6">
+                                <h4 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                                    Texte
+                                </h4>
+                                <MarkdownContent
+                                    markdown={activeTask.material.body}
+                                    className="text-base leading-7"
+                                />
+                            </article>
+                        )}
                         {activePart.module === 'schreiben' && review ? (
                             <MarkdownContent markdown={activeTask.prompt ?? ''} className="text-base leading-7" />
                         ) : activePart.module !== 'schreiben' ? (
@@ -598,7 +609,7 @@ export default function StudentExamSessionShow({
                                     {activeTask.choices.map((choice) => (
                                         <label
                                             key={choice.id}
-                                            className={`flex min-h-12 w-full cursor-pointer items-center justify-center rounded-md border px-4 py-3 font-medium sm:flex-1 ${reviewChoiceClass(choice.id)} ${isLocked ? 'cursor-not-allowed opacity-70' : ''}`}
+                                            className={`flex min-h-12 w-full cursor-pointer flex-col items-start gap-2 rounded-md border p-4 text-left sm:flex-1 ${reviewChoiceClass(choice.id)} ${isLocked ? 'cursor-not-allowed opacity-70' : ''}`}
                                         >
                                             <input
                                                 type="radio"
@@ -615,7 +626,15 @@ export default function StudentExamSessionShow({
                                                 }
                                                 className="sr-only"
                                             />
-                                            Annonce {choice.label}
+                                            <span className="font-medium">
+                                                Annonce {choice.label}
+                                            </span>
+                                            {choice.body && (
+                                                <MarkdownContent
+                                                    markdown={choice.body}
+                                                    className="font-normal"
+                                                />
+                                            )}
                                         </label>
                                     ))}
                                 </div>
